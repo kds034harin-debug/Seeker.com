@@ -12,7 +12,7 @@ body {
     min-height: 100vh;
 }
 
-/* ========== САЙДБАР (ДЕСКТОП) ========== */
+/* ===== SIDEBAR ===== */
 .sidebar {
     width: 260px;
     background: #fafafa;
@@ -24,7 +24,7 @@ body {
     height: 100vh;
     overflow-y: auto;
     z-index: 100;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, width 0.3s ease;
 }
 
 .logo {
@@ -158,48 +158,17 @@ body {
     color: #1a1a1a;
 }
 
-/* ========== МОБИЛЬНАЯ КНОПКА ========== */
-.mobile-toggle {
-    display: none;
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 200;
-    background: #1a1a1a;
-    color: white;
-    border: none;
-    padding: 12px 14px;
-    border-radius: 10px;
-    font-size: 22px;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: 0.3s;
-}
-
-.mobile-toggle:hover {
-    background: #333;
-}
-
-.mobile-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    z-index: 50;
-}
-
-/* ========== ОСНОВНОЙ КОНТЕНТ ========== */
+/* ===== MAIN CONTENT ===== */
 .main-content {
     flex: 1;
     margin-left: 260px;
     padding: 2rem 3rem;
     min-height: 100vh;
     background: #ffffff;
+    transition: margin-left 0.3s ease, padding 0.3s ease;
 }
 
+/* ===== SEARCH ===== */
 .search-wrapper {
     max-width: 650px;
     margin: 0 auto 2rem auto;
@@ -227,6 +196,7 @@ body {
     color: #1a1a1a;
     font-size: 1rem;
     outline: none;
+    min-width: 0;
 }
 
 .search-container button {
@@ -237,12 +207,14 @@ body {
     color: #ffffff;
     font-weight: 500;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .search-container button:hover {
     background: #333;
 }
 
+/* ===== RESULTS ===== */
 .results-stats {
     margin-bottom: 1.5rem;
     font-size: 0.8rem;
@@ -284,6 +256,7 @@ body {
 
 .card-content {
     flex: 1;
+    min-width: 0;
 }
 
 .card-header {
@@ -312,6 +285,7 @@ body {
     font-weight: 600;
     margin-bottom: 0.4rem;
     color: #1a1a1a;
+    word-break: break-word;
 }
 
 .description {
@@ -319,6 +293,7 @@ body {
     color: #666;
     line-height: 1.4;
     margin-bottom: 0.5rem;
+    word-break: break-word;
 }
 
 .info-grid {
@@ -353,12 +328,14 @@ body {
     font-size: 0.7rem;
     color: #555;
     text-decoration: none;
+    word-break: break-word;
 }
 
 .link-btn:hover {
     background: #e0e0e0;
 }
-/* ========== НОВОСТИ ========== */
+
+/* ===== NEWS ===== */
 .news-section {
     margin-top: 2rem;
     border-top: 1px solid #ebebeb;
@@ -371,38 +348,24 @@ body {
     align-items: center;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .section-title {
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #1a1a1a;
-    letter-spacing: -0.5px;
-}
-
-.section-title i {
-    color: #2b6ef0;
-    margin-right: 0.5rem;
 }
 
 .refresh-news-btn {
     background: #1a1a1a;
     color: white;
     border: none;
-    padding: 0.5rem 1.2rem;
-    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 500;
-    transition: 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.refresh-news-btn:hover {
-    background: #333;
+    font-size: 0.7rem;
+    margin-right: 0.5rem;
 }
 
 .news-time {
@@ -410,34 +373,25 @@ body {
     color: #bbb;
 }
 
-/* ===== СЕТКА НОВОСТЕЙ (КАРТОЧКИ) ===== */
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.2rem;
 }
 
-/* ===== КАРТОЧКА НОВОСТИ ===== */
 .news-card {
     background: #fafafa;
     border: 1px solid #ebebeb;
-    border-radius: 16px;
-    padding: 1.5rem;
-    transition: all 0.25s ease;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    border-radius: 14px;
+    padding: 1.2rem;
+    transition: all 0.2s;
 }
 
 .news-card:hover {
     border-color: #d0d0d0;
     background: #ffffff;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
-/* ===== ВЕРХНЯЯ ЧАСТЬ КАРТОЧКИ ===== */
 .news-header {
     display: flex;
     justify-content: space-between;
@@ -448,159 +402,43 @@ body {
 }
 
 .news-category {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #2b6ef0;
-    background: #eef4ff;
-    padding: 0.2rem 0.8rem;
-    border-radius: 30px;
-    display: inline-block;
+    color: #aaa;
 }
 
 .news-date {
-    font-size: 0.65rem;
-    color: #bbb;
-    font-weight: 400;
-}
-
-/* ===== ЗАГОЛОВОК НОВОСТИ ===== */
-.news-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.6rem;
-    color: #1a1a1a;
-    line-height: 1.3;
-    transition: color 0.2s;
-}
-
-.news-card:hover .news-title {
-    color: #2b6ef0;
-}
-
-/* ===== ОПИСАНИЕ НОВОСТИ ===== */
-.news-desc {
-    font-size: 0.85rem;
-    color: #555;
-    line-height: 1.5;
-    margin-bottom: 0.75rem;
-    flex: 1;
-}
-
-/* ===== ССЫЛКА "ЧИТАТЬ ПОДРОБНЕЕ" ===== */
-.news-link {
-    font-size: 0.75rem;
-    color: #1a1a1a;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    margin-top: auto;
-    padding-top: 0.5rem;
-    border-top: 1px solid #f0f0f0;
-    transition: color 0.2s;
-}
-
-.news-link:hover {
-    color: #2b6ef0;
-}
-
-.news-link i {
-    font-size: 0.7rem;
-    transition: transform 0.2s;
-}
-
-.news-card:hover .news-link i {
-    transform: translateX(4px);
-}
-
-/* ===== ДЛЯ АДМИНА (кнопки редактирования) ===== */
-.news-admin-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.edit-news-btn,
-.delete-news-btn {
-    background: #f1f5f9;
-    border: none;
-    padding: 0.2rem 0.6rem;
-    border-radius: 6px;
     font-size: 0.6rem;
+    color: #bbb;
+}
+
+.news-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
     cursor: pointer;
-    transition: 0.2s;
+    word-break: break-word;
 }
 
-.edit-news-btn:hover {
-    background: #e2e8f0;
+.news-desc {
+    font-size: 0.8rem;
+    color: #666;
+    line-height: 1.45;
+    margin-bottom: 0.75rem;
+    word-break: break-word;
 }
 
-.delete-news-btn {
-    color: #c0392b;
+.news-link {
+    font-size: 0.7rem;
+    color: #1a1a1a;
+    cursor: pointer;
+    word-break: break-word;
 }
 
-.delete-news-btn:hover {
-    background: #fee2e2;
-}
-
-/* ===== ЗВЁЗДОЧКА ИЗБРАННОГО ===== */
 .favorite-star-btn {
     background: none;
     border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    color: #ddd;
-    transition: 0.2s;
-    padding: 0 4px;
-    margin-left: auto;
-}
-
-.favorite-star-btn:hover {
-    color: #f59e0b;
-    transform: scale(1.1);
-}
-
-.favorite-star-btn.active {
-    color: #f59e0b;
-}
-
-/* ===== АДАПТИВНОСТЬ ===== */
-@media (max-width: 768px) {
-    .news-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .news-card {
-        padding: 1.2rem;
-    }
-
-    .news-title {
-        font-size: 1rem;
-    }
-
-    .section-title {
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .news-card {
-        padding: 1rem;
-        border-radius: 12px;
-    }
-
-    .news-title {
-        font-size: 0.95rem;
-    }
-
-    .news-desc {
-        font-size: 0.8rem;
-    }
-}
-border: none;
     font-size: 1rem;
     cursor: pointer;
     color: #ccc;
@@ -616,7 +454,7 @@ border: none;
     color: #ffc107;
 }
 
-/* ========== МОДАЛЬНОЕ ОКНО ========== */
+/* ===== MODAL ===== */
 .modal {
     display: none;
     position: fixed;
@@ -628,14 +466,17 @@ border: none;
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    padding: 1rem;
 }
 
 .modal-content {
     background: #ffffff;
     border-radius: 20px;
     width: 380px;
-    max-width: 90%;
+    max-width: 100%;
     padding: 1.8rem;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal-header {
@@ -689,6 +530,7 @@ border: none;
     border-radius: 10px;
     font-size: 0.85rem;
     outline: none;
+    width: 100%;
 }
 
 .auth-form button {
@@ -731,399 +573,451 @@ border: none;
     100% { opacity: 0; transform: translateX(50px); }
 }
 
-/* ============================================================
-   ========== АДАПТИВНОСТЬ ДЛЯ ВСЕХ УСТРОЙСТВ ==========
-   ============================================================ */
+/* ======================================================
+   ===== АДАПТИВНОСТЬ =====
+   ====================================================== */
 
-/* ===== ПЛАНШЕТЫ И МАЛЕНЬКИЕ НОУТБУКИ (до 1024px) ===== */
+/* --- Планшеты (768px - 1024px) --- */
 @media (max-width: 1024px) {
     .main-content {
         padding: 1.5rem 2rem;
     }
+    
     .news-grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
-    .search-wrapper {
-        max-width: 550px;
-    }
 }
 
-/* ===== МОБИЛЬНЫЕ УСТРОЙСТВА (до 768px) ===== */
+/* --- Мобильные устройства (до 768px) --- */
 @media (max-width: 768px) {
-    body {
-        flex-direction: column;
-    }
-
-    /* Скрываем сайдбар по умолчанию */
+    /* Сайдбар становится верхней панелью */
     .sidebar {
-        width: 280px;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        transform: translateX(-100%);
-        z-index: 150;
-        padding: 1.5rem 1.2rem;
-        box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem 1.25rem;
+        border-right: none;
+        border-bottom: 1px solid #ebebeb;
+        max-height: 80vh;
         overflow-y: auto;
     }
-
-    .sidebar.open {
-        transform: translateX(0);
+    
+    /* Скрываем сайдбар (можно будет показывать по гамбургер-меню) */
+    .sidebar.collapsed {
+        max-height: 0;
+        padding: 0 1.25rem;
+        overflow: hidden;
+        border-bottom: none;
     }
-
-    /* Кнопка гамбургера */
-    .mobile-toggle {
-        display: block;
-    }
-
-    /* Оверлей */
-    .mobile-overlay.show {
-        display: block;
-    }
-
-    /* Основной контент */
+    
     .main-content {
         margin-left: 0;
-        padding: 1rem 1rem 2rem 1rem;
-        margin-top: 65px;
-        width: 100%;
+        padding: 1.25rem;
     }
-
-    /* Логотип */
+    
+    /* Логотип компактнее */
     .logo h1 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
-
+    
     /* Поиск */
-    .search-wrapper {
-        max-width: 100%;
-        margin: 0 auto 1rem auto;
-    }
     .search-container {
-        padding: 0.3rem 0.3rem 0.3rem 1rem;
+        padding: 0.3rem 0.3rem 0.3rem 0.8rem;
         border-radius: 12px;
     }
+    
     .search-container input {
-        padding: 0.7rem 0;
+        padding: 0.6rem 0;
         font-size: 0.9rem;
     }
+    
     .search-container button {
         padding: 0.5rem 1.2rem;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         border-radius: 10px;
     }
-
-    /* Карточки */
+    
+    /* Карточки результатов — вертикальные */
     .result-card {
         flex-direction: column;
         padding: 1rem;
         gap: 0.8rem;
-        border-radius: 12px;
     }
+    
     .card-image {
         width: 100%;
         height: 180px;
-        border-radius: 8px;
+        max-width: 100%;
     }
-    .card-header {
-        flex-wrap: wrap;
-    }
-    .title {
-        font-size: 1rem;
-    }
-    .description {
-        font-size: 0.8rem;
-    }
-
-    /* Новости */
+    
+    /* Карточки новостей */
     .news-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 0.8rem;
     }
+    
     .news-card {
         padding: 1rem;
+    }
+    
+    /* Заголовки */
+    .section-title {
+        font-size: 1rem;
+    }
+    
+    /* Модалка */
+    .modal-content {
+        width: 100%;
+        margin: 1rem;
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+    
+    /* Toast */
+    .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        text-align: center;
+        font-size: 0.85rem;
+        padding: 10px 16px;
+    }
+}
+
+/* --- Маленькие телефоны (до 480px) --- */
+@media (max-width: 480px) {
+    .sidebar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .main-content {
+        padding: 0.75rem 1rem;
+    }
+    
+    .logo h1 {
+        font-size: 1.2rem;
+    }
+    
+    .logo-badge {
+        font-size: 0.5rem;
+    }
+    
+    .sidebar-menu li, .type-filters li {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .search-container {
+        padding: 0.2rem 0.2rem 0.2rem 0.6rem;
+        border-radius: 10px;
+        gap: 0.3rem;
+    }
+    
+    .search-container input {
+        padding: 0.5rem 0;
+        font-size: 0.8rem;
+    }
+    
+    .search-container button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+    
+    .result-card {
+        padding: 0.8rem;
+        gap: 0.6rem;
         border-radius: 12px;
     }
-    .news-title {
-        font-size: 0.95rem;
+    
+    .card-image {
+        height: 150px;
     }
-
-    /* Заголовок секций */
+    
+    .title {
+        font-size: 0.9rem;
+    }
+    
+    .description {
+        font-size: 0.75rem;
+    }
+    
+    .info-grid {
+        font-size: 0.6rem;
+        gap: 0.5rem;
+    }
+    
+    .news-card {
+        padding: 0.8rem;
+    }
+    
+    .news-title {
+        font-size: 0.9rem;
+    }
+    
+    .news-desc {
+        font-size: 0.75rem;
+    }
+    
+    .modal-content {
+        padding: 1.2rem;
+        border-radius: 14px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .auth-form input {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .auth-form button {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
     }
-    .section-title {
-        font-size: 1rem;
-    }
+    
     .refresh-news-btn {
         font-size: 0.65rem;
         padding: 0.3rem 0.8rem;
     }
-
-    /* Модальное окно */
-    .modal-content {
-        width: 95%;
-        padding: 1.2rem;
-        margin: 0 10px;
-        border-radius: 16px;
-    }
-    .modal-header h2 {
-        font-size: 1.1rem;
-    }
-    .auth-form input {
-        padding: 0.6rem;
-        font-size: 0.8rem;
-    }
-    .auth-form button {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-    }
-
+    
     .results-stats {
         font-size: 0.7rem;
-        padding-bottom: 0.5rem;
     }
+}
 
-    .empty-state {
-        padding: 2rem;
-        font-size: 0.9rem;
+/* --- Очень маленькие экраны (до 360px) --- */
+@media (max-width: 360px) {
+    .main-content {
+        padding: 0.5rem;
     }
-
-    .toast {
-        bottom: 20px;
-        right: 20px;
-        left: 20px;
-        text-align: center;
-        font-size: 0.85rem;
-        padding: 10px 16px;
-        border-radius: 8px;
-    }
-
-    .info-grid {
-        font-size: 0.65rem;
+    
+    .search-container {
+        flex-direction: column;
+        background: transparent;
+        border: none;
+        padding: 0;
         gap: 0.5rem;
     }
-
-    .links-section {
-        gap: 0.4rem;
-    }
-
-    .link-btn {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 4px;
-    }
-}
-
-/* ===== ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) ===== */
-@media (max-width: 480px) {
-    .main-content {
-        padding: 0.8rem 0.8rem 1.5rem 0.8rem;
-    }
-
-    .sidebar {
-        width: 260px;
-        padding: 1.2rem 1rem;
-    }
-
-    .mobile-toggle {
-        top: 12px;
-        left: 12px;
-        padding: 10px 12px;
-        font-size: 18px;
-    }
-
+    
     .search-container input {
-        font-size: 0.8rem;
-        padding: 0.6rem 0;
+        background: #ffffff;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        padding: 0.6rem 0.8rem;
     }
+    
     .search-container button {
-        padding: 0.4rem 1rem;
-        font-size: 0.7rem;
-        border-radius: 8px;
+        width: 100%;
+        padding: 0.6rem;
     }
-
+    
     .card-image {
-        height: 150px;
+        height: 120px;
     }
-
+    
     .title {
-        font-size: 0.9rem;
-    }
-    .description {
-        font-size: 0.75rem;
-    }
-
-    .news-title {
-        font-size: 0.85rem;
-    }
-    .news-desc {
-        font-size: 0.75rem;
-    }
-
-    .modal-content {
-        padding: 1rem;
-        border-radius: 14px;
-    }
-
-    .logo h1 {
-        font-size: 1.3rem;
-    }
-
-    .section-title {
-        font-size: 0.9rem;
-    }
-
-    .auth-btn, .admin-btn {
-        padding: 0.5rem;
-        font-size: 0.7rem;
-    }
-
-    .sidebar-menu li, .type-filters li {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.75rem;
-    }
-
-    .favorite-star-btn {
-        font-size: 0.85rem;
-    }
-
-    .result-card {
-        padding: 0.8rem;
-        border-radius: 10px;
-    }
-
-    .news-card {
-        padding: 0.8rem;
-        border-radius: 10px;
-    }
-
-    .results-stats {
-        font-size: 0.65rem;
-    }
-
-    .empty-state {
-        padding: 1.5rem;
         font-size: 0.8rem;
     }
 }
 
-/* ===== ВЫСОКИЕ ЭКРАНЫ (ноутбуки и мониторы) ===== */
-@media (min-width: 1200px) {
-    .main-content {
-        padding: 2.5rem 4rem;
-    }
-
-    .search-wrapper {
-        max-width: 700px;
-    }
-
-    .search-container input {
-        font-size: 1.1rem;
-        padding: 1rem 0;
-    }
-
-    .search-container button {
-        padding: 0.7rem 2.5rem;
-        font-size: 1rem;
-    }
-
-    .news-grid {
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    }
-
-    .result-card {
-        padding: 1.5rem;
-        gap: 1.5rem;
-    }
-
-    .card-image {
-        width: 110px;
-        height: 155px;
-    }
-}
-
-/* ===== АЛЬБОМНАЯ ОРИЕНТАЦИЯ НА МОБИЛЬНЫХ ===== */
-@media (max-width: 900px) and (orientation: landscape) {
+/* --- Альбомная ориентация на телефонах --- */
+@media (max-width: 768px) and (orientation: landscape) {
     .sidebar {
-        width: 220px;
-        padding: 1rem;
+        max-height: 60vh;
     }
-
-    .main-content {
-        margin-top: 55px;
-        padding: 0.8rem 1rem 1.5rem 1rem;
-    }
-
+    
     .card-image {
         height: 140px;
     }
-
-    .mobile-toggle {
-        top: 10px;
-        left: 10px;
-        padding: 8px 10px;
-        font-size: 16px;
+    
+    .result-card {
+        flex-direction: row;
     }
+    
+    .card-image {
+        width: 80px;
+        height: 120px;
+        flex-shrink: 0;
+    }
+}
 
+/* --- Планшеты в альбомной ориентации --- */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
     .news-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
-/* ===== САЙДБАР НА ДЕСКТОПЕ (всегда открыт) ===== */
-@media (min-width: 769px) {
-    .sidebar {
-        transform: translateX(0) !important;
-    }
-    .mobile-overlay {
-        display: none !important;
-    }
-    .mobile-toggle {
-        display: none !important;
-    }
+/* --- Кнопка-гамбургер (добавьте в HTML) --- */
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: #1a1a1a;
 }
 
-/* ===== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===== */
 @media (max-width: 768px) {
-    /* Увеличение области касания */
-    .sidebar-menu li,
-    .type-filters li,
-    .favorite-star-btn,
-    .action-btn {
-        padding: 0.7rem 0.75rem;
-        min-height: 44px;
+    .hamburger {
+        display: block;
     }
+}
 
-    .auth-btn,
-    .admin-btn {
-        padding: 0.8rem;
-        min-height: 48px;
+/* --- Тёмная тема (опционально) --- */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #1a1a1a;
+        color: #e8e8e8;
     }
-
-    .search-container button {
-        min-height: 44px;
-    }
-
-    /* Скрываем скроллбар */
-    .sidebar::-webkit-scrollbar {
-        width: 4px;
-    }
-    .sidebar::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border-radius: 4px;
-    }
-
-    /* Анимации */
+    
     .sidebar {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #222;
+        border-right-color: #333;
     }
-
+    
+    .main-content {
+        background: #1a1a1a;
+    }
+    
+    .logo {
+        border-bottom-color: #333;
+    }
+    
+    .logo h1 {
+        color: #e8e8e8;
+    }
+    
     .result-card, .news-card {
-        transition: all 0.2s ease;
+        background: #222;
+        border-color: #333;
+    }
+    
+    .result-card:hover, .news-card:hover {
+        background: #2a2a2a;
+        border-color: #444;
+    }
+    
+    .search-container {
+        background: #222;
+        border-color: #333;
+    }
+    
+    .search-container input {
+        color: #e8e8e8;
+    }
+    
+    .search-container:focus-within {
+        border-color: #666;
+    }
+    
+    .title, .news-title, .section-title {
+        color: #e8e8e8;
+    }
+    
+    .description, .news-desc {
+        color: #aaa;
+    }
+    
+    .sidebar-menu li, .type-filters li {
+        color: #aaa;
+    }
+    
+    .sidebar-menu li:hover, .type-filters li:hover {
+        background: #333;
+        color: #fff;
+    }
+    
+    .sidebar-menu li.active, .type-filters li.active {
+        background: #444;
+    }
+    
+    .auth-btn {
+        background: #444;
+    }
+    
+    .auth-btn:hover {
+        background: #555;
+    }
+    
+    .modal-content {
+        background: #222;
+    }
+    
+    .modal-tabs {
+        border-bottom-color: #333;
+    }
+    
+    .tab-btn {
+        color: #888;
+    }
+    
+    .tab-btn.active {
+        color: #e8e8e8;
+        border-bottom-color: #e8e8e8;
+    }
+    
+    .auth-form input {
+        background: #333;
+        border-color: #444;
+        color: #e8e8e8;
+    }
+    
+    .auth-form button {
+        background: #444;
+    }
+    
+    .close-btn {
+        color: #888;
+    }
+    
+    .results-stats {
+        border-bottom-color: #333;
+        color: #888;
+    }
+    
+    .news-section {
+        border-top-color: #333;
+    }
+    
+    .link-btn {
+        background: #333;
+        color: #aaa;
+    }
+    
+    .link-btn:hover {
+        background: #444;
+    }
+    
+    .admin-update-btn {
+        background: #333;
+        color: #e8e8e8;
+    }
+    
+    .refresh-news-btn {
+        background: #444;
+    }
+    
+    .user-menu {
+        background: #333;
+    }
+    
+    .card-image {
+        background-color: #333;
+    }
+    
+    .toast {
+        background: #333;
+        color: #e8e8e8;
     }
 }
