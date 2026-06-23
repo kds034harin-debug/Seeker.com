@@ -910,6 +910,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (adminUpdateBtn) adminUpdateBtn.addEventListener('click', updateAllNews);
     if (refreshBtn) refreshBtn.addEventListener('click', updateAllNews);
     
+    // Обработка Enter в модальном окне новостей
+    const newsCategory = document.getElementById('newsCategory');
+    const newsTitle = document.getElementById('newsTitle');
+    const newsDescription = document.getElementById('newsDescription');
+    const newsUrl = document.getElementById('newsUrl');
+    
+    if (newsCategory) {
+        newsCategory.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (newsTitle) newsTitle.focus();
+            }
+        });
+    }
+    
+    if (newsTitle) {
+        newsTitle.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (newsDescription) newsDescription.focus();
+            }
+        });
+    }
+    
+    if (newsDescription) {
+        newsDescription.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (newsUrl) newsUrl.focus();
+            }
+        });
+    }
+    
+    if (newsUrl) {
+        newsUrl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveNewsFromModal();
+            }
+        });
+    }
+    
     // Закрытие модалок по клику вне окна
     window.addEventListener('click', (e) => {
         if (e.target === authModal) closeModal();
