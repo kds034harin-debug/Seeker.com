@@ -1,0 +1,124 @@
+// Глобальная база данных контента
+let contentDatabase = [
+    // ========== ФИЛЬМЫ ==========
+    { 
+        id: 1, type: "movie", title: "Дюна: Часть вторая", year: "2024", rating: "8.9",
+        description: "Эпическая научная фантастика Дени Вильнёва. Пол Атрейдес продолжает свой путь по Арракису.",
+        image: "https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dnbOE6PYpEGBgT.jpg",
+        director: "Дени Вильнёв", cast: "Тимоти Шаламе, Зендея", duration: "166 мин",
+        links: { watch: "https://www.kinopoisk.ru/film/dyuna-chast-vtoraya-2024/" }
+    },
+    { 
+        id: 2, type: "movie", title: "Интерстеллар", year: "2014", rating: "9.3",
+        description: "Путешествие сквозь червоточину, любовь и спасение человечества.",
+        image: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+        director: "Кристофер Нолан", cast: "Мэттью МакКонахи, Энн Хэтэуэй", duration: "169 мин",
+        links: { watch: "https://www.kinopoisk.ru/film/interstellar/" }
+    },
+    { 
+        id: 3, type: "movie", title: "Оппенгеймер", year: "2023", rating: "8.5",
+        description: "История создателя атомной бомбы Роберта Оппенгеймера.",
+        image: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+        director: "Кристофер Нолан", cast: "Киллиан Мёрфи, Мэтт Деймон", duration: "180 мин",
+        links: { watch: "https://www.kinopoisk.ru/film/oppenheimer-2023/" }
+    },
+    { 
+        id: 4, type: "movie", title: "Джон Уик 4", year: "2023", rating: "8.2",
+        description: "Легендарный киллер продолжает борьбу с Правлением.",
+        image: "https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
+        director: "Чад Стахелски", cast: "Киану Ривз, Донни Йен", duration: "169 мин",
+        links: { watch: "https://www.kinopoisk.ru/film/john-wick-4/" }
+    },
+    { 
+        id: 5, type: "movie", title: "Барби", year: "2023", rating: "7.8",
+        description: "Фэнтезийная комедия о культовой кукле.",
+        image: "https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg",
+        director: "Грета Гервиг", cast: "Марго Робби, Райан Гослинг", duration: "114 мин",
+        links: { watch: "https://www.kinopoisk.ru/film/barbie/" }
+    },
+    { 
+        id: 16, type: "movie", title: "Ведьмак: Кошмар волка", year: "2021", rating: "7.4",
+        description: "Анимационный фильм-приквел к сериалу 'Ведьмак'.",
+        image: "https://image.tmdb.org/t/p/w500/7vjaCdMw15BcXhrLhIErge1TFqd.jpg",
+        director: "Кванг Ил Хан", cast: "Тео Джеймс, Лара Пулвер", duration: "83 мин",
+        links: { watch: "https://www.netflix.com/title/81435651" }
+    },
+
+    // ========== СЕРИАЛЫ ==========
+    { 
+        id: 6, type: "series", title: "Ведьмак (Netflix)", year: "2019-2023", rating: "8.0",
+        description: "Генри Кавилл в роли Геральта из Ривии.",
+        image: "https://image.tmdb.org/t/p/w500/7vjaCdMw15BcXhrLhIErge1TFqd.jpg",
+        creator: "Лорен Шмидт-Хиссрих", seasons: "3 сезона", episodes: "24 эпизода",
+        links: { watch: "https://www.netflix.com/title/80189685" }
+    },
+    { 
+        id: 7, type: "series", title: "Игра престолов", year: "2011-2019", rating: "9.2",
+        description: "Эпическая сага о борьбе за Железный трон.",
+        image: "https://image.tmdb.org/t/p/w500/7WUHnJGxMy8gCTlGKqVYpSJZXkF.jpg",
+        creator: "Дэвид Бениофф, Д.Б. Вайс", seasons: "8 сезонов", episodes: "73 эпизода",
+        links: { watch: "https://www.kinopoisk.ru/series/464348/" }
+    },
+    { 
+        id: 8, type: "series", title: "The Last of Us (HBO)", year: "2023", rating: "9.1",
+        description: "Экранизация культовой игры. В постапокалиптическом мире Джоэл и Элли путешествуют через развалины Америки.",
+        image: "https://image.tmdb.org/t/p/w500/k9bb6UwO4pE2cRQgFJXqHVO8e4h.jpg",
+        creator: "Крэйг Мейзин", seasons: "1 сезон", episodes: "9 эпизодов",
+        links: { watch: "https://www.kinopoisk.ru/series/the-last-of-us-2023/" }
+    },
+
+    // ========== ИГРЫ ==========
+    { 
+        id: 9, type: "game", title: "Ведьмак 3: Дикая Охота", year: "2015", rating: "9.6",
+        description: "Легендарная RPG от CD Projekt RED.",
+        image: "https://image.tmdb.org/t/p/w500/kDp1v12nJCLVc1y8tUf3PvC5XKb.jpg",
+        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox, Switch", genre: "RPG",
+        links: { buy: "https://store.steampowered.com/app/292030/" }
+    },
+    { 
+        id: 10, type: "game", title: "Cyberpunk 2077", year: "2020", rating: "8.2",
+        description: "Приключения наёмника Ви в Найт-Сити.",
+        image: "https://image.tmdb.org/t/p/w500/9QusWjfnYxX7q0fAxfM63apLr2P.jpg",
+        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox", genre: "Киберпанк",
+        links: { buy: "https://store.steampowered.com/app/1091500/" }
+    },
+    { 
+        id: 11, type: "game", title: "The Last of Us Part I", year: "2022", rating: "9.5",
+        description: "Ремастер культовой игры о выживании в постапокалиптическом мире.",
+        image: "https://image.api.playstation.com/vulcan/ap/rnd/202206/0221/efP7VK7p8QhMq7J8XJ3wK3R4.png",
+        developer: "Naughty Dog", platforms: "PC, PS5", genre: "Action-adventure",
+        links: { buy: "https://store.steampowered.com/app/1888930/" }
+    },
+
+    // ========== КНИГИ ==========
+    { 
+        id: 12, type: "book", title: "Ведьмак. Последнее желание", year: "1993", rating: "8.9",
+        description: "Первый сборник рассказов Анджея Сапковского.",
+        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Wiedźmin",
+        author: "Анджей Сапковский", pages: "288",
+        links: { buy: "https://www.litres.ru/andzhey-sapkovskiy/poslednee-zhelanie/" }
+    },
+    { 
+        id: 13, type: "book", title: "Дюна", year: "1965", rating: "9.2",
+        description: "Шедевр научной фантастики Фрэнка Герберта.",
+        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Dune",
+        author: "Фрэнк Герберт", pages: "412",
+        links: { buy: "https://www.litres.ru/frenk-gerbert/duna/" }
+    },
+    { 
+        id: 14, type: "book", title: "1984", year: "1949", rating: "9.0",
+        description: "Классический роман-антиутопия Джорджа Оруэлла.",
+        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=1984",
+        author: "Джордж Оруэлл", pages: "328",
+        links: { buy: "https://www.litres.ru/dzhordzh-oruell/1984/" }
+    },
+    { 
+        id: 15, type: "book", title: "Гарри Поттер и философский камень", year: "1997", rating: "9.0",
+        description: "Начало магической саги о мальчике-волшебнике.",
+        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Harry+Potter",
+        author: "Джоан Роулинг", pages: "332",
+        links: { buy: "https://www.litres.ru/dzhoan-rouling/garri-potter-i-filosofskiy-kamen/" }
+    }
+];
+
+console.log('База данных загружена, количество записей:', contentDatabase.length);

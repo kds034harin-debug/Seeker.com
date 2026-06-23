@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Сикер — поиск фильмов, сериалов, игр и книг</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- МОДАЛЬНОЕ ОКНО (РЕГИСТРАЦИЯ / АВТОРИЗАЦИЯ) -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Сикер</h2>
+            <span class="close-btn" id="closeModalBtn">&times;</span>
+        </div>
+        <div class="modal-tabs">
+            <button class="tab-btn active" data-tab="login">Вход</button>
+            <button class="tab-btn" data-tab="register">Регистрация</button>
+        </div>
+        
+        <div id="loginForm" class="auth-form active">
+            <input type="email" placeholder="Email" id="loginEmail">
+            <input type="password" placeholder="Пароль" id="loginPassword">
+            <button id="loginBtn">Войти</button>
+            <p class="auth-hint">Админ: admin@seeker.com / admin123</p>
+        </div>
+        
+        <div id="registerForm" class="auth-form">
+            <input type="text" placeholder="Имя" id="regName">
+            <input type="email" placeholder="Email" id="regEmail">
+            <input type="password" placeholder="Пароль" id="regPassword">
+            <input type="password" placeholder="Повторите пароль" id="regPassword2">
+            <button id="registerBtn">Зарегистрироваться</button>
+        </div>
+    </div>
+</div>
+
+<!-- ЛЕВАЯ ПАНЕЛЬ -->
+<div class="sidebar">
+    <div class="logo">
+        <h1>Сикер</h1>
+        <span class="logo-badge">media</span>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>ПОИСК</h3>
+        <ul class="sidebar-menu">
+            <li class="active" data-page="home">Для вас</li>
+            <li data-page="favorites">Избранное</li>
+            <li data-page="recent">Недавние</li>
+            <li data-page="collections">Коллекции</li>
+        </ul>
+    </div>
+
+    <div class="sidebar-section">
+        <h3>ТИПЫ КОНТЕНТА</h3>
+        <ul class="type-filters" id="typeFilters">
+            <li data-category="all" class="active">Все</li>
+            <li data-category="movie">Фильмы</li>
+            <li data-category="series">Сериалы</li>
+            <li data-category="game">Игры</li>
+            <li data-category="book">Книги</li>
+        </ul>
+    </div>
+
+    <div id="adminPanel" style="display: none;">
+        <button id="adminAddNewsBtn" class="admin-btn admin-add-btn">+ Добавить новость</button>
+        <button id="adminUpdateNewsBtn" class="admin-btn admin-update-btn">↻ Обновить новости</button>
+    </div>
+
+    <div class="sidebar-footer">
+        <button class="auth-btn" id="showAuthBtn">Войти / Регистрация</button>
+        <div class="user-menu" id="userMenu" style="display: none;">
+            <div class="avatar" id="userAvatar"></div>
+            <span id="userName">Пользователь</span>
+            <button id="logoutBtn" class="logout-small">Выйти</button>
+        </div>
+    </div>
+</div>
+
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<main class="main-content">
+    <div class="search-wrapper">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Поиск фильмов, сериалов, игр, книг...">
+            <button id="searchBtn">Найти</button>
+        </div>
+    </div>
+
+    <div class="results-stats" id="resultsStats" style="display: none;">
+        <span id="resultCount">0</span> результатов
+    </div>
+    <div id="resultsContainer" class="results-grid" style="display: none;"></div>
+
+    <div class="news-section" id="newsSection">
+        <div class="section-header">
+            <h2 class="section-title"><i class="far fa-newspaper"></i> Новости индустрии</h2>
+            <div>
+                <button id="refreshNewsBtn" class="refresh-news-btn">
+                    <i class="fas fa-sync-alt"></i> Свежие
+                </button>
+                <span class="news-time" id="newsUpdateTime"></span>
+            </div>
+        </div>
+        <div id="newsContainer" class="news-grid"></div>
+    </div>
+</main>
+
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
