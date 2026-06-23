@@ -24,10 +24,9 @@
         <div id="loginForm" class="auth-form active">
             <input type="email" placeholder="Email" id="loginEmail">
             <input type="password" placeholder="Пароль" id="loginPassword">
-                <div class="password-error" id="loginPasswordError"></div>  <!-- Добавить эту строку -->
-
+            <div class="password-error" id="loginPasswordError"></div>
             <button id="loginBtn">Войти</button>
-            
+            <p class="auth-hint">Админ: admin@seeker.com / admin123</p>
         </div>
         
         <div id="registerForm" class="auth-form">
@@ -131,9 +130,35 @@
     </div>
 </main>
 
+<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ (ПРАВИЛЬНЫЙ ПОРЯДОК) -->
 <script src="data.js"></script>
 <script src="utils.js"></script>
 <script src="api.js"></script>
 <script src="app.js"></script>
+
+<script>
+// ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: если кнопки всё ещё не работают
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Все скрипты загружены');
+    console.log('✅ window.openNewsModal:', typeof window.openNewsModal);
+    console.log('✅ window.toggleFavorite:', typeof window.toggleFavorite);
+    console.log('✅ window.performSearch:', typeof window.performSearch);
+    
+    // Проверка кнопок
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn) {
+        console.log('✅ Кнопка поиска найдена');
+    } else {
+        console.error('❌ Кнопка поиска НЕ найдена!');
+    }
+    
+    const authBtn = document.getElementById('showAuthBtn');
+    if (authBtn) {
+        console.log('✅ Кнопка авторизации найдена');
+    } else {
+        console.error('❌ Кнопка авторизации НЕ найдена!');
+    }
+});
+</script>
 </body>
 </html>
