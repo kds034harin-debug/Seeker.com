@@ -432,8 +432,8 @@ async function getFilmDetails(filmId) {
 }
 
 // ========== API ДЛЯ ИГР (IGDB / Twitch) ==========
-const IGDB_CLIENT_ID = ''; // Вставьте свой Client-ID
-const IGDB_ACCESS_TOKEN = ''; // Вставьте свой Access Token
+const IGDB_CLIENT_ID = 'ioi10i8wb2uk3fo6cjg30wxfe5e40w';
+const IGDB_ACCESS_TOKEN = 'tno0fgk7ughap8xc08hoe2b44osst0'; // Вставьте свой Access Token
 
 async function searchIGDB(query) {
     if (!query || query.trim() === '') return [];
