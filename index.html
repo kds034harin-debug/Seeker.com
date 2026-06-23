@@ -9,15 +9,7 @@
 </head>
 <body>
 
-<!-- КНОПКА ГАМБУРГЕРА (для мобильных устройств) -->
-<button class="mobile-toggle" id="mobileToggle" aria-label="Меню">
-    <i class="fas fa-bars"></i>
-</button>
-
-<!-- ОВЕРЛЕЙ (затемнение фона при открытом меню) -->
-<div class="mobile-overlay" id="mobileOverlay"></div>
-
-<!-- МОДАЛЬНОЕ ОКНО (РЕГИСТРАЦИЯ / АВТОРИЗАЦИЯ) -->
+<!-- МОДАЛЬНОЕ ОКНО (АВТОРИЗАЦИЯ) -->
 <div id="authModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -33,15 +25,35 @@
             <input type="email" placeholder="Email" id="loginEmail">
             <input type="password" placeholder="Пароль" id="loginPassword">
             <button id="loginBtn">Войти</button>
-            <p class="auth-hint">Админ: admin@seeker.com / admin123</p>
+            
         </div>
         
         <div id="registerForm" class="auth-form">
             <input type="text" placeholder="Имя" id="regName">
             <input type="email" placeholder="Email" id="regEmail">
-            <input type="password" placeholder="Пароль" id="regPassword">
+            <input type="password" placeholder="Пароль (мин. 6 символов)" id="regPassword" minlength="6">
+            <div class="password-error" id="regPasswordError"></div>
             <input type="password" placeholder="Повторите пароль" id="regPassword2">
             <button id="registerBtn">Зарегистрироваться</button>
+        </div>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО (СОЗДАНИЕ/РЕДАКТИРОВАНИЕ НОВОСТЕЙ) -->
+<div id="newsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="newsModalTitle">Создание новости</h2>
+            <span class="close-btn" id="closeNewsModalBtn">&times;</span>
+        </div>
+        <div class="auth-form active" style="display:flex;">
+            <input type="text" placeholder="Категория (Игры/Фильмы/Сериалы/Книги)" id="newsCategory">
+            <input type="text" placeholder="Заголовок" id="newsTitle">
+            <textarea placeholder="Описание" id="newsDescription"></textarea>
+            <input type="url" placeholder="Ссылка" id="newsUrl">
+            <input type="hidden" id="newsEditId" value="">
+            <button id="newsSaveBtn">Сохранить</button>
+            <button id="newsCancelBtn" style="background:#f0f0f0;color:#555;">Отмена</button>
         </div>
     </div>
 </div>
@@ -75,8 +87,8 @@
     </div>
 
     <div id="adminPanel" style="display: none;">
-        <button id="adminAddNewsBtn" class="admin-btn admin-add-btn">+ Добавить новость</button>
-        <button id="adminUpdateNewsBtn" class="admin-btn admin-update-btn">↻ Обновить новости</button>
+        <button id="adminAddNewsBtn" class="admin-btn admin-add-btn"><i class="fas fa-plus"></i> Добавить новость</button>
+        <button id="adminUpdateNewsBtn" class="admin-btn admin-update-btn"><i class="fas fa-sync-alt"></i> Обновить новости</button>
     </div>
 
     <div class="sidebar-footer">
@@ -93,7 +105,7 @@
 <main class="main-content">
     <div class="search-wrapper">
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Поиск фильмов, сериалов, игр, книг... Например: Мстители, Ведьмак">
+            <input type="text" id="searchInput" placeholder="Поиск фильмов, сериалов, игр, книг...">
             <button id="searchBtn">Найти</button>
         </div>
     </div>
@@ -117,7 +129,6 @@
     </div>
 </main>
 
-<script src="config.js"></script>
 <script src="data.js"></script>
 <script src="utils.js"></script>
 <script src="api.js"></script>
