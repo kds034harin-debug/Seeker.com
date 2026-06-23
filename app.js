@@ -1,4 +1,3 @@
-
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 let searchInput, searchBtn, resultsContainer, resultsStatsBlock, newsSection;
 let currentCategory = "all";
@@ -8,8 +7,10 @@ let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 let favoriteNews = JSON.parse(localStorage.getItem('favoriteNews') || '[]');
 let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 let isAdmin = localStorage.getItem('isAdmin') === 'true';
+let isLoading = false;
 
-const modal = document.getElementById('authModal');
+const authModal = document.getElementById('authModal');
+const newsModal = document.getElementById('newsModal');
 
 // ========== НОВОСТИ ==========
 let newsDatabase = JSON.parse(localStorage.getItem('seeker_news')) || [
@@ -25,6 +26,8 @@ let newsDatabase = JSON.parse(localStorage.getItem('seeker_news')) || [
 
 function saveNewsToStorage() {
     localStorage.setItem('seeker_news', JSON.stringify(newsDatabase));
+    const timeSpan = document.getElementById('newsUpdateTime');
+    if (timeSpan) timeSpan.innerText = `Обновлено: ${new Date().toLocaleString()}`;
 }
 
 function saveFavoritesToStorage() {
@@ -32,10 +35,18 @@ function saveFavoritesToStorage() {
     localStorage.setItem('favoriteNews', JSON.stringify(favoriteNews));
 }
 
+// ========== ВАЛИДАЦИЯ ПАРОЛЯ ==========
+function validatePassword(password) {
+    if (password.length < 6) {
+        return { valid: false, message: 'Пароль должен содержать минимум 6 символов' };
+    }
+    return { valid: true };
+}
+
 // ========== ФУНКЦИИ ИЗБРАННОГО ==========
 function toggleFavorite(itemId, type) {
     if (!currentUser) {
-        alert("Войдите в аккаунт!");
+        showToast("Войдите в аккаунт!");
         openModal();
         return false;
     }
@@ -50,6 +61,7 @@ function toggleFavorite(itemId, type) {
         }
         saveFavoritesToStorage();
         renderNews();
+        if (currentPage === "favorites") renderFavoritesPage();
     } else {
         if (favorites.includes(itemId)) {
             favorites = favorites.filter(id => id !== itemId);
@@ -100,6 +112,24 @@ function getRecentItems() {
     return JSON.parse(localStorage.getItem(`recent_${currentUser.email}`) || '[]');
 }
 
+function clearRecentHistory() {
+    if (!currentUser) return;
+    if (confirm("Очистить всю историю просмотров?")) {
+        localStorage.setItem(`recent_${currentUser.email}`, '[]');
+        if (currentPage === "recent") renderRecentPage();
+        showToast("История просмотров очищена!");
+    }
+}
+
+function removeFromRecent(itemId) {
+    if (!currentUser) return;
+    let recentItems = JSON.parse(localStorage.getItem(`recent_${currentUser.email}`) || '[]');
+    recentItems = recentItems.filter(item => item.id !== itemId);
+    localStorage.setItem(`recent_${currentUser.email}`, JSON.stringify(recentItems));
+    if (currentPage === "recent") renderRecentPage();
+    showToast("Элемент удалён из истории");
+}
+
 function addCurrentToRecent(itemId, itemType) {
     if (!currentUser) return;
     let itemData = null;
@@ -113,6 +143,103 @@ function addCurrentToRecent(itemId, itemType) {
     if (itemData) addToRecent(itemId, itemType, itemData);
 }
 
+// ========== МОДАЛЬНОЕ ОКНО НОВОСТЕЙ ==========
+function openNewsModal(newsId = null) {
+    const modal = document.getElementById('newsModal');
+    const title = document.getElementById('newsModalTitle');
+    const category = document.getElementById('newsCategory');
+    const newsTitle = document.getElementById('newsTitle');
+    const description = document.getElementById('newsDescription');
+    const url = document.getElementById('newsUrl');
+    const editId = document.getElementById('newsEditId');
+    const saveBtn = document.getElementById('newsSaveBtn');
+    
+    if (newsId) {
+        // Режим редактирования
+        const news = newsDatabase.find(n => n.id === newsId);
+        if (!news) {
+            showToast('Новость не найдена');
+            return;
+        }
+        title.textContent = '✏️ Редактирование новости';
+        category.value = news.category;
+        newsTitle.value = news.title;
+        description.value = news.description;
+        url.value = news.url;
+        editId.value = newsId;
+        saveBtn.textContent = 'Обновить';
+    } else {
+        // Режим создания
+        title.textContent = '📝 Создание новости';
+        category.value = '';
+        newsTitle.value = '';
+        description.value = '';
+        url.value = 'https://';
+        editId.value = '';
+        saveBtn.textContent = 'Сохранить';
+    }
+    
+    modal.style.display = 'flex';
+}
+
+function closeNewsModal() {
+    document.getElementById('newsModal').style.display = 'none';
+}
+
+function saveNewsFromModal() {
+    const category = document.getElementById('newsCategory').value.trim();
+    const title = document.getElementById('newsTitle').value.trim();
+    const description = document.getElementById('newsDescription').value.trim();
+    const url = document.getElementById('newsUrl').value.trim();
+    const editId = document.getElementById('newsEditId').value;
+    
+    // Валидация
+    if (!category) {
+        showToast('Введите категорию!');
+        return;
+    }
+    if (!title) {
+        showToast('Введите заголовок!');
+        return;
+    }
+    if (!description) {
+        showToast('Введите описание!');
+        return;
+    }
+    if (!url) {
+        showToast('Введите ссылку!');
+        return;
+    }
+    
+    if (editId) {
+        // Редактирование
+        const news = newsDatabase.find(n => n.id === parseInt(editId));
+        if (news) {
+            news.category = category;
+            news.title = title;
+            news.description = description;
+            news.url = url;
+            news.date = new Date().toLocaleString();
+            showToast('✅ Новость обновлена!');
+        }
+    } else {
+        // Создание
+        newsDatabase.unshift({
+            id: Date.now(),
+            category: category,
+            title: title,
+            description: description,
+            date: new Date().toLocaleString(),
+            url: url
+        });
+        showToast('✅ Новость добавлена!');
+    }
+    
+    saveNewsToStorage();
+    renderNews();
+    closeNewsModal();
+}
+
 // ========== ОТРИСОВКА НОВОСТЕЙ ==========
 function renderNews() {
     const newsContainer = document.getElementById('newsContainer');
@@ -120,7 +247,14 @@ function renderNews() {
     
     const isAdminUser = isAdmin || (currentUser && currentUser.email === 'admin@seeker.com');
     
-    newsContainer.innerHTML = newsDatabase.map(news => {
+    // Сортировка новостей по дате (сначала новые)
+    const sortedNews = [...newsDatabase].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA;
+    });
+    
+    newsContainer.innerHTML = sortedNews.map(news => {
         const isFav = isFavorite(news.id, 'news');
         return `
             <div class="news-card">
@@ -128,8 +262,10 @@ function renderNews() {
                     <span class="news-category">${escapeHtml(news.category)}</span>
                     <span class="news-date">${escapeHtml(news.date)}</span>
                     ${currentUser ? `<button class="favorite-star-btn ${isFav ? 'active' : ''}" data-id="${news.id}" data-type="news" onclick="event.stopPropagation(); toggleFavorite(${news.id}, 'news')">${isFav ? '★' : '☆'}</button>` : ''}
-                    ${isAdminUser ? `<button class="edit-news-btn" data-id="${news.id}" style="background:#f0f0f0; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:10px;" onclick="editNewsModal(${news.id})">Ред</button>
-                    <button class="delete-news-btn" data-id="${news.id}" style="background:#f0f0f0; border:1px solid #ebebeb; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:10px; color:#c0392b;" onclick="if(confirm('Удалить?')){ newsDatabase = newsDatabase.filter(n=>n.id!==${news.id}); saveNewsToStorage(); renderNews(); }">Удал</button>` : ''}
+                    ${isAdminUser ? `
+                        <button class="edit-news-btn" data-id="${news.id}" style="background:#f0f0f0; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:10px;" onclick="openNewsModal(${news.id})">✏️ Ред</button>
+                        <button class="delete-news-btn" data-id="${news.id}" style="background:#f0f0f0; border:1px solid #ebebeb; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:10px; color:#c0392b;" onclick="if(confirm('Удалить новость?')){ newsDatabase = newsDatabase.filter(n=>n.id!==${news.id}); saveNewsToStorage(); renderNews(); showToast('🗑️ Новость удалена'); }">🗑️ Удал</button>
+                    ` : ''}
                 </div>
                 <div class="news-title" onclick="addCurrentToRecent(${news.id}, 'news'); window.open('${news.url}', '_blank')">${escapeHtml(news.title)}</div>
                 <div class="news-desc">${escapeHtml(news.description)}</div>
@@ -137,42 +273,6 @@ function renderNews() {
             </div>
         `;
     }).join('');
-}
-
-function editNewsModal(id) {
-    const news = newsDatabase.find(n => n.id === id);
-    if (!news) return;
-    const newTitle = prompt("Заголовок:", news.title);
-    if (!newTitle) return;
-    const newDesc = prompt("Описание:", news.description);
-    if (!newDesc) return;
-    news.title = newTitle;
-    news.description = newDesc;
-    news.date = new Date().toLocaleString();
-    saveNewsToStorage();
-    renderNews();
-    showToast("Новость обновлена!");
-}
-
-function showAddNewsModal() {
-    const category = prompt("Категория (Игры/Фильмы/Сериалы/Книги):", "Игры");
-    if (!category) return;
-    const title = prompt("Заголовок:");
-    if (!title) return;
-    const description = prompt("Описание:");
-    if (!description) return;
-    const url = prompt("Ссылка:", "https://");
-    newsDatabase.unshift({
-        id: Date.now(),
-        category: category,
-        title: title,
-        description: description,
-        date: new Date().toLocaleString(),
-        url: url || "#"
-    });
-    saveNewsToStorage();
-    renderNews();
-    showToast("Новость добавлена!");
 }
 
 // ========== ОТРИСОВКА КАРТОЧЕК ==========
@@ -222,8 +322,10 @@ function renderCards(items) {
     });
 }
 
-// ========== ПОИСК ==========
-function performSearch() {
+// ========== ПОИСК С ИНТЕГРАЦИЕЙ API ==========
+async function performSearch() {
+    if (isLoading) return;
+    
     const searchTerm = searchInput.value.trim().toLowerCase();
     currentQuery = searchTerm;
     
@@ -239,108 +341,131 @@ function performSearch() {
         return;
     }
     
-    let filteredContent = [...contentDatabase];
-    if (currentCategory !== "all") {
-        filteredContent = filteredContent.filter(item => item.type === currentCategory);
-    }
-    filteredContent = filteredContent.filter(item => 
-        (item.title && item.title.toLowerCase().includes(searchTerm)) ||
-        (item.description && item.description.toLowerCase().includes(searchTerm))
-    );
-    
-    let filteredNews = [...newsDatabase];
-    filteredNews = filteredNews.filter(news => 
-        (news.title && news.title.toLowerCase().includes(searchTerm)) ||
-        (news.description && news.description.toLowerCase().includes(searchTerm))
-    );
-    
-    const allResults = [...filteredContent, ...filteredNews];
-    const totalResults = allResults.length;
-    
-    newsSectionElem.style.display = "none";
+    isLoading = true;
+    resultsContainerElem.innerHTML = `<div class="loading-spinner" style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-pulse"></i> Поиск на Кинопоиске...</div>`;
     resultsContainerElem.style.display = "flex";
     resultsStatsElem.style.display = "block";
-    document.getElementById('resultCount').innerText = totalResults;
+    newsSectionElem.style.display = "none";
     
-    if (totalResults === 0) {
-        resultsContainerElem.innerHTML = `<div class="empty-state">Ничего не найдено по запросу "${escapeHtml(searchTerm)}"</div>`;
-        return;
-    }
-    
-    const contentResults = allResults.filter(r => r.type);
-    const newsResults = allResults.filter(r => r.category && !r.type);
-    
-    let html = '';
-    
-    if (contentResults.length > 0) {
-        html += `<h3 style="margin: 0 0 1rem 0;">Контент (${contentResults.length})</h3>`;
-        html += contentResults.map(item => {
-            const typeLabel = getTypeLabel(item.type);
-            const links = getLinksByType(item);
-            let imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-            const isFav = isFavorite(item.id, 'content');
-            
-            return `
-                <div class="result-card" data-id="${item.id}" data-type="${item.type}">
-                    <div class="card-image" style="background-image: url(${imageUrl});"></div>
-                    <div class="card-content">
-                        <div class="card-header">
-                            <span class="content-type">${typeLabel}</span>
-                            ${currentUser ? `<button class="favorite-star-btn ${isFav ? 'active' : ''}" data-id="${item.id}" data-type="content" onclick="event.stopPropagation(); toggleFavorite(${item.id}, 'content')">${isFav ? '★' : '☆'}</button>` : ''}
+    try {
+        // Поиск через API Кинопоиска
+        let apiResults = await searchKinopoiskAPI(searchTerm);
+        
+        // Поиск в локальной базе
+        let localResults = contentDatabase.filter(item => 
+            (item.title && item.title.toLowerCase().includes(searchTerm)) ||
+            (item.description && item.description.toLowerCase().includes(searchTerm))
+        );
+        
+        // Фильтр по типу
+        if (currentCategory !== "all") {
+            localResults = localResults.filter(item => item.type === currentCategory);
+            apiResults = apiResults.filter(item => item.type === currentCategory);
+        }
+        
+        // Объединяем результаты (сначала API, потом локальные)
+        let allResults = [...apiResults];
+        for (const local of localResults) {
+            if (!allResults.some(api => api.title === local.title)) {
+                allResults.push(local);
+            }
+        }
+        
+        // Поиск в новостях
+        let filteredNews = newsDatabase.filter(news => 
+            (news.title && news.title.toLowerCase().includes(searchTerm)) ||
+            (news.description && news.description.toLowerCase().includes(searchTerm))
+        );
+        
+        const totalResults = allResults.length + filteredNews.length;
+        document.getElementById('resultCount').innerText = totalResults;
+        
+        if (totalResults === 0) {
+            resultsContainerElem.innerHTML = `<div class="empty-state">Ничего не найдено по запросу "${escapeHtml(searchTerm)}"</div>`;
+            isLoading = false;
+            return;
+        }
+        
+        let html = '';
+        
+        if (allResults.length > 0) {
+            html += `<h3 style="margin: 0 0 1rem 0;">🎬 Контент (${allResults.length})</h3>`;
+            html += allResults.map(item => {
+                const typeLabel = getTypeLabel(item.type);
+                const links = getLinksByType(item);
+                let imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+                const isFav = isFavorite(item.id, 'content');
+                
+                return `
+                    <div class="result-card" data-id="${item.id}" data-type="${item.type}">
+                        <div class="card-image" style="background-image: url(${imageUrl});"></div>
+                        <div class="card-content">
+                            <div class="card-header">
+                                <span class="content-type">${typeLabel}</span>
+                                ${item.rating ? `<span class="year-rating">⭐ ${item.rating}</span>` : ''}
+                                ${currentUser ? `<button class="favorite-star-btn ${isFav ? 'active' : ''}" data-id="${item.id}" data-type="content" onclick="event.stopPropagation(); toggleFavorite(${item.id}, 'content')">${isFav ? '★' : '☆'}</button>` : ''}
+                            </div>
+                            <div class="title">${escapeHtml(item.title)}</div>
+                            <div class="description">${escapeHtml((item.description || '').substring(0, 120))}...</div>
+                            <div class="links-section">${links.map(link => `<a href="${link.url}" target="_blank" class="link-btn">${link.text}</a>`).join('')}</div>
                         </div>
-                        <div class="title">${escapeHtml(item.title)}</div>
-                        <div class="description">${escapeHtml((item.description || '').substring(0, 100))}...</div>
-                        <div class="links-section">${links.map(link => `<a href="${link.url}" target="_blank" class="link-btn">${link.text}</a>`).join('')}</div>
                     </div>
-                </div>
-            `;
-        }).join('');
-    }
-    
-    if (newsResults.length > 0) {
-        html += `<h3 style="margin: 1.5rem 0 1rem 0;">Новости (${newsResults.length})</h3>`;
-        html += newsResults.map(news => {
-            const isFav = isFavorite(news.id, 'news');
-            return `
-                <div class="news-card" style="margin-bottom: 1rem;">
-                    <div class="news-header">
-                        <span class="news-category">${escapeHtml(news.category)}</span>
-                        <span class="news-date">${escapeHtml(news.date)}</span>
-                        ${currentUser ? `<button class="favorite-star-btn ${isFav ? 'active' : ''}" data-id="${news.id}" data-type="news" onclick="event.stopPropagation(); toggleFavorite(${news.id}, 'news')">${isFav ? '★' : '☆'}</button>` : ''}
+                `;
+            }).join('');
+        }
+        
+        if (filteredNews.length > 0) {
+            html += `<h3 style="margin: 1.5rem 0 1rem 0;">📰 Новости (${filteredNews.length})</h3>`;
+            html += filteredNews.map(news => {
+                const isFav = isFavorite(news.id, 'news');
+                return `
+                    <div class="news-card" style="margin-bottom: 1rem;">
+                        <div class="news-header">
+                            <span class="news-category">${escapeHtml(news.category)}</span>
+                            <span class="news-date">${escapeHtml(news.date)}</span>
+                            ${currentUser ? `<button class="favorite-star-btn ${isFav ? 'active' : ''}" data-id="${news.id}" data-type="news" onclick="event.stopPropagation(); toggleFavorite(${news.id}, 'news')">${isFav ? '★' : '☆'}</button>` : ''}
+                        </div>
+                        <div class="news-title" onclick="addCurrentToRecent(${news.id}, 'news'); window.open('${news.url}', '_blank')">${escapeHtml(news.title)}</div>
+                        <div class="news-desc">${escapeHtml(news.description)}</div>
+                        <div class="news-link" onclick="addCurrentToRecent(${news.id}, 'news'); window.open('${news.url}', '_blank')">Читать подробнее →</div>
                     </div>
-                    <div class="news-title" onclick="addCurrentToRecent(${news.id}, 'news'); window.open('${news.url}', '_blank')">${escapeHtml(news.title)}</div>
-                    <div class="news-desc">${escapeHtml(news.description)}</div>
-                    <div class="news-link" onclick="addCurrentToRecent(${news.id}, 'news'); window.open('${news.url}', '_blank')">Читать подробнее →</div>
-                </div>
-            `;
-        }).join('');
-    }
-    
-    resultsContainerElem.innerHTML = html;
-    
-    document.querySelectorAll('.favorite-star-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            toggleFavorite(btn.dataset.id, btn.dataset.type);
-        };
-    });
-    
-    document.querySelectorAll('.result-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-            addCurrentToRecent(parseInt(card.dataset.id), card.dataset.type);
+                `;
+            }).join('');
+        }
+        
+        resultsContainerElem.innerHTML = html;
+        
+        document.querySelectorAll('.favorite-star-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                toggleFavorite(btn.dataset.id, btn.dataset.type);
+            };
         });
-    });
+        
+        document.querySelectorAll('.result-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
+                addCurrentToRecent(parseInt(card.dataset.id), card.dataset.type);
+            });
+        });
+        
+    } catch (error) {
+        console.error('Ошибка поиска:', error);
+        resultsContainerElem.innerHTML = `<div class="empty-state">Ошибка поиска. Попробуйте позже.</div>`;
+    } finally {
+        isLoading = false;
+    }
 }
 
 // ========== СТРАНИЦА ИЗБРАННОГО ==========
 function renderFavoritesPage() {
-    document.getElementById('newsSection').style.display = "none";
+    const newsSectionElem = document.getElementById('newsSection');
+    newsSectionElem.style.display = "none";
     resultsContainer.style.display = "flex";
     resultsStatsBlock.style.display = "block";
     
     if (!currentUser) {
-        resultsContainer.innerHTML = `<div class="empty-state">Войдите в аккаунт</div>`;
+        resultsContainer.innerHTML = `<div class="empty-state">Войдите в аккаунт, чтобы видеть избранное</div>`;
         document.getElementById('resultCount').innerText = "0";
         return;
     }
@@ -351,14 +476,14 @@ function renderFavoritesPage() {
     document.getElementById('resultCount').innerText = total;
     
     if (total === 0) {
-        resultsContainer.innerHTML = `<div class="empty-state">Нет избранного</div>`;
+        resultsContainer.innerHTML = `<div class="empty-state">У вас пока нет избранного</div>`;
         return;
     }
     
     let html = '';
     
     if (favContent.length > 0) {
-        html += `<h3 style="margin:0 0 1rem 0;">Контент (${favContent.length})</h3>`;
+        html += `<h3 style="margin:0 0 1rem 0;">🎬 Контент (${favContent.length})</h3>`;
         html += favContent.map(item => {
             const links = getLinksByType(item);
             let imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
@@ -379,7 +504,7 @@ function renderFavoritesPage() {
     }
     
     if (favNews.length > 0) {
-        html += `<h3 style="margin:1.5rem 0 1rem 0;">Новости (${favNews.length})</h3>`;
+        html += `<h3 style="margin:1.5rem 0 1rem 0;">📰 Новости (${favNews.length})</h3>`;
         html += favNews.map(news => `
             <div class="news-card" style="margin-bottom:1rem;">
                 <div class="news-header">
@@ -399,21 +524,23 @@ function renderFavoritesPage() {
 
 // ========== СТРАНИЦА НЕДАВНИХ ==========
 function renderRecentPage() {
-    document.getElementById('newsSection').style.display = "none";
+    const newsSectionElem = document.getElementById('newsSection');
+    newsSectionElem.style.display = "none";
     resultsContainer.style.display = "flex";
     resultsStatsBlock.style.display = "block";
     
     if (!currentUser) {
-        resultsContainer.innerHTML = `<div class="empty-state">Войдите в аккаунт</div>`;
+        resultsContainer.innerHTML = `<div class="empty-state">Войдите в аккаунт, чтобы видеть историю просмотров</div>`;
         document.getElementById('resultCount').innerText = "0";
         return;
     }
     
     const recentItems = getRecentItems();
-    document.getElementById('resultCount').innerText = recentItems.length;
+    const totalCount = recentItems.length;
+    document.getElementById('resultCount').innerText = totalCount;
     
-    if (recentItems.length === 0) {
-        resultsContainer.innerHTML = `<div class="empty-state">История пуста</div>`;
+    if (totalCount === 0) {
+        resultsContainer.innerHTML = `<div class="empty-state">История просмотров пуста</div>`;
         return;
     }
     
@@ -423,13 +550,13 @@ function renderRecentPage() {
     let html = `<div style="display:flex; justify-content:flex-end; margin-bottom:1rem;"><button id="clearHistoryBtn" style="background:none; border:1px solid #ebebeb; padding:0.3rem 0.8rem; border-radius:6px; cursor:pointer; font-size:0.7rem; color:#c0392b;">Очистить историю</button></div>`;
     
     if (contentItems.length > 0) {
-        html += `<h3 style="margin:0 0 1rem 0;">Контент (${contentItems.length})</h3>`;
+        html += `<h3 style="margin:0 0 1rem 0;">🎬 Просмотренный контент (${contentItems.length})</h3>`;
         for (const item of contentItems) {
             const imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
             const fullItem = contentDatabase.find(dbItem => dbItem.id == item.id);
             const links = fullItem ? getLinksByType(fullItem) : [];
             html += `
-                <div class="result-card">
+                <div class="result-card recent-item">
                     <div class="card-image" style="background-image: url(${imageUrl});"></div>
                     <div class="card-content">
                         <div class="card-header">
@@ -437,6 +564,7 @@ function renderRecentPage() {
                             <div><button class="remove-recent-btn" data-id="${item.id}" style="background:none; border:none; cursor:pointer; color:#ccc;"><i class="fas fa-times-circle"></i></button></div>
                         </div>
                         <div class="title">${escapeHtml(item.title)}</div>
+                        <div class="description" style="font-size:0.7rem; color:#aaa;">Просмотрено: ${item.date}</div>
                         <div class="links-section">${links.map(link => `<a href="${link.url}" target="_blank" class="link-btn">${link.text}</a>`).join('')}</div>
                     </div>
                 </div>
@@ -445,17 +573,17 @@ function renderRecentPage() {
     }
     
     if (newsItems.length > 0) {
-        html += `<h3 style="margin:1.5rem 0 1rem 0;">Новости (${newsItems.length})</h3>`;
+        html += `<h3 style="margin:1.5rem 0 1rem 0;">📰 Просмотренные новости (${newsItems.length})</h3>`;
         for (const item of newsItems) {
             html += `
-                <div class="news-card" style="margin-bottom:1rem;">
+                <div class="news-card recent-news-item" style="margin-bottom:1rem;">
                     <div class="news-header">
-                        <span class="news-category">${escapeHtml(item.category)}</span>
+                        <span class="news-category">${escapeHtml(item.category || 'Новости')}</span>
                         <span class="news-date">${escapeHtml(item.date)}</span>
                         <div><button class="remove-recent-news-btn" data-id="${item.id}" style="background:none; border:none; cursor:pointer; color:#ccc;"><i class="fas fa-times-circle"></i></button></div>
                     </div>
                     <div class="news-title" onclick="window.open('${item.url}', '_blank')">${escapeHtml(item.title)}</div>
-                    <div class="news-desc">${escapeHtml(item.description)}</div>
+                    <div class="news-desc">${escapeHtml(item.description || '')}</div>
                     <div class="news-link" onclick="window.open('${item.url}', '_blank')">Читать подробнее →</div>
                 </div>
             `;
@@ -467,47 +595,39 @@ function renderRecentPage() {
     document.querySelectorAll('.remove-recent-btn, .remove-recent-news-btn').forEach(btn => {
         btn.onclick = () => {
             const id = parseInt(btn.dataset.id);
-            let recentItems = getRecentItems();
-            recentItems = recentItems.filter(item => item.id !== id);
-            localStorage.setItem(`recent_${currentUser.email}`, JSON.stringify(recentItems));
-            renderRecentPage();
-            showToast("Удалено из истории");
+            removeFromRecent(id);
         };
     });
     
     const clearBtn = document.getElementById('clearHistoryBtn');
-    if (clearBtn) {
-        clearBtn.onclick = () => {
-            if (confirm("Очистить всю историю?")) {
-                localStorage.setItem(`recent_${currentUser.email}`, '[]');
-                renderRecentPage();
-                showToast("История очищена");
-            }
-        };
-    }
+    if (clearBtn) clearBtn.onclick = () => clearRecentHistory();
 }
 
 // ========== СТРАНИЦА КОЛЛЕКЦИЙ ==========
 function renderCollectionsPage() {
-    document.getElementById('newsSection').style.display = "none";
+    const newsSectionElem = document.getElementById('newsSection');
+    newsSectionElem.style.display = "none";
     resultsContainer.style.display = "flex";
     resultsStatsBlock.style.display = "block";
     
     const collections = [
         { name: "Игры от CD Projekt RED", items: ["Ведьмак 3", "Cyberpunk 2077"] },
         { name: "Фильмы Кристофера Нолана", items: ["Интерстеллар", "Оппенгеймер"] },
-        { name: "Книги по вселенной Ведьмака", items: ["Последнее желание", "Меч Предназначения"] }
+        { name: "Книги по вселенной Ведьмака", items: ["Последнее желание", "Меч Предназначения"] },
+        { name: "Лучшие игры 2023-2024", items: ["Baldur's Gate 3", "Alan Wake 2", "The Last of Us Part I"] }
     ];
     
     document.getElementById('resultCount').innerText = collections.length;
     
     resultsContainer.innerHTML = `
-        <div>
-            <h3 style="margin-bottom:1rem;">Наши коллекции</h3>
+        <div class="collections-page">
+            <h3 style="margin-bottom: 1.5rem;">📁 Наши коллекции</h3>
             ${collections.map(c => `
-                <div style="background:#fafafa; border-radius:12px; padding:1rem; margin-bottom:1rem; border:1px solid #ebebeb;">
-                    <h4>${c.name}</h4>
-                    <div style="margin-top:0.5rem;">${c.items.map(item => `<span style="display:inline-block; background:#e8e8e8; padding:0.2rem 0.6rem; border-radius:4px; margin-right:0.5rem; font-size:0.7rem; cursor:pointer;" onclick="document.getElementById('searchInput').value='${item}'; document.getElementById('searchBtn').click()">${item}</span>`).join('')}</div>
+                <div class="collection-card" style="background: #fafafa; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #ebebeb;">
+                    <h4 style="margin-bottom: 0.5rem;">${c.name}</h4>
+                    <div class="collection-items" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                        ${c.items.map(item => `<span class="collection-tag" style="display: inline-block; background: #e8e8e8; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.7rem; cursor: pointer;" onclick="document.getElementById('searchInput').value='${item}'; document.getElementById('searchBtn').click()">${item}</span>`).join('')}
+                    </div>
                 </div>
             `).join('')}
         </div>
@@ -515,8 +635,8 @@ function renderCollectionsPage() {
 }
 
 // ========== АВТОРИЗАЦИЯ ==========
-function openModal() { if (modal) modal.style.display = "flex"; }
-function closeModal() { if (modal) modal.style.display = "none"; }
+function openModal() { if (authModal) authModal.style.display = "flex"; }
+function closeModal() { if (authModal) authModal.style.display = "none"; }
 
 function switchTab(tab) {
     const loginForm = document.getElementById('loginForm');
@@ -535,54 +655,113 @@ function switchTab(tab) {
 }
 
 function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    if (email && password) {
-        currentUser = { name: email.split('@')[0], email: email };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        if (email === 'admin@seeker.com' && password === 'admin123') {
-            isAdmin = true;
-            localStorage.setItem('isAdmin', 'true');
-            alert("Добро пожаловать, Администратор!");
-        } else {
-            isAdmin = false;
-            localStorage.setItem('isAdmin', 'false');
-            alert("Добро пожаловать, " + currentUser.name + "!");
-        }
-        updateUserUI();
-        closeModal();
-        renderNews();
-        if (currentPage === "favorites") renderFavoritesPage();
-        if (currentPage === "recent") renderRecentPage();
+    const errorEl = document.getElementById('loginPasswordError');
+    
+    if (errorEl) errorEl.textContent = '';
+    
+    if (!email || !password) {
+        alert('Заполните все поля');
+        return;
     }
+    
+    // Проверка пароля
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+        if (errorEl) {
+            errorEl.textContent = passwordCheck.message;
+        } else {
+            alert(passwordCheck.message);
+        }
+        return;
+    }
+    
+    currentUser = { name: email.split('@')[0], email: email };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    // Восстанавливаем избранное пользователя
+    const savedFav = localStorage.getItem(`favorites_${email}`);
+    const savedFavNews = localStorage.getItem(`favoriteNews_${email}`);
+    if (savedFav) favorites = JSON.parse(savedFav);
+    if (savedFavNews) favoriteNews = JSON.parse(savedFavNews);
+    
+    if (email === 'admin@seeker.com' && password === 'admin123') {
+        isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        showToast('👋 Добро пожаловать, Администратор!');
+    } else {
+        isAdmin = false;
+        localStorage.setItem('isAdmin', 'false');
+        showToast('👋 Добро пожаловать, ' + currentUser.name + '!');
+    }
+    
+    updateUserUI();
+    closeModal();
+    renderNews();
+    if (currentPage === "favorites") renderFavoritesPage();
+    if (currentPage === "recent") renderRecentPage();
 }
 
 function handleRegister() {
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value;
     const password2 = document.getElementById('regPassword2').value;
-    if (!name || !email || !password) { alert("Заполните все поля"); return; }
-    if (password !== password2) { alert("Пароли не совпадают"); return; }
+    const errorEl = document.getElementById('regPasswordError');
+    
+    if (errorEl) errorEl.textContent = '';
+    
+    if (!name || !email || !password) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    // Проверка пароля
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+        if (errorEl) {
+            errorEl.textContent = passwordCheck.message;
+        } else {
+            alert(passwordCheck.message);
+        }
+        return;
+    }
+    
+    if (password !== password2) {
+        if (errorEl) {
+            errorEl.textContent = 'Пароли не совпадают';
+        } else {
+            alert('Пароли не совпадают');
+        }
+        return;
+    }
+    
     currentUser = { name: name, email: email };
     localStorage.setItem('currentUser', JSON.stringify(currentUser));
     isAdmin = false;
     localStorage.setItem('isAdmin', 'false');
     updateUserUI();
     closeModal();
-    alert("Добро пожаловать, " + name + "!");
+    showToast('👋 Добро пожаловать, ' + name + '!');
 }
 
 function logout() {
+    if (currentUser) {
+        localStorage.setItem(`favorites_${currentUser.email}`, JSON.stringify(favorites));
+        localStorage.setItem(`favoriteNews_${currentUser.email}`, JSON.stringify(favoriteNews));
+    }
     currentUser = null;
     isAdmin = false;
+    favorites = [];
+    favoriteNews = [];
     localStorage.removeItem('currentUser');
     localStorage.setItem('isAdmin', 'false');
     updateUserUI();
     renderNews();
     if (currentPage === "favorites") renderFavoritesPage();
     if (currentPage === "recent") renderRecentPage();
+    showToast('👋 Вы вышли из аккаунта');
 }
 
 function updateUserUI() {
@@ -601,6 +780,7 @@ function updateUserUI() {
         userMenu.style.display = "none";
         showAuthBtn.style.display = "block";
     }
+    
     if (adminPanel) adminPanel.style.display = isAdmin ? "block" : "none";
 }
 
@@ -634,7 +814,6 @@ function updateAllNews() {
         refreshBtn.disabled = true;
     }
     
-    // Добавляем несколько новых демо-новостей для теста
     const demoNews = [
         { category: "Игры", title: "Новый трейлер GTA 6 набрал 100 млн просмотров за сутки", description: "Рекордный трейлер долгожданной игры побил все ожидания.", url: "https://www.rockstargames.com/gta-vi" },
         { category: "Фильмы", title: "Дэдпул 3: первые отзывы критиков", description: "Критики в восторге от триквела с Райаном Рейнольдсом и Хью Джекманом.", url: "https://www.marvel.com/movies/deadpool-3" },
@@ -660,13 +839,13 @@ function updateAllNews() {
         if (newsDatabase.length > 30) newsDatabase = newsDatabase.slice(0, 30);
         saveNewsToStorage();
         renderNews();
-        showToast(`Добавлено ${added} новых новостей!`);
+        showToast(`✅ Добавлено ${added} новых новостей!`);
     } else {
         showToast("Новости актуальны!");
     }
     
     if (refreshBtn) {
-        refreshBtn.innerHTML = 'Свежие';
+        refreshBtn.innerHTML = '🔄 Свежие';
         refreshBtn.disabled = false;
     }
 }
@@ -674,6 +853,7 @@ function updateAllNews() {
 // ========== ИНИЦИАЛИЗАЦИЯ ==========
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM загружен, инициализация...');
+    console.log('API Кинопоиска ключ загружен');
     
     searchInput = document.getElementById('searchInput');
     searchBtn = document.getElementById('searchBtn');
@@ -697,6 +877,7 @@ document.addEventListener('DOMContentLoaded', () => {
         menuItem.addEventListener('click', () => navigateTo(menuItem.dataset.page));
     });
     
+    // Обработчики для модального окна авторизации
     const showAuthBtn = document.getElementById('showAuthBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
     const loginBtn = document.getElementById('loginBtn');
@@ -714,25 +895,50 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
     
-    window.onclick = (e) => { if (e.target === modal) closeModal(); };
-    
+    // Обработчики для модального окна новостей
+    const closeNewsModalBtn = document.getElementById('closeNewsModalBtn');
+    const newsCancelBtn = document.getElementById('newsCancelBtn');
+    const newsSaveBtn = document.getElementById('newsSaveBtn');
     const adminAddBtn = document.getElementById('adminAddNewsBtn');
     const adminUpdateBtn = document.getElementById('adminUpdateNewsBtn');
     const refreshBtn = document.getElementById('refreshNewsBtn');
     
-    if (adminAddBtn) adminAddBtn.onclick = showAddNewsModal;
-    if (adminUpdateBtn) adminUpdateBtn.onclick = updateAllNews;
-    if (refreshBtn) refreshBtn.onclick = updateAllNews;
+    if (closeNewsModalBtn) closeNewsModalBtn.addEventListener('click', closeNewsModal);
+    if (newsCancelBtn) newsCancelBtn.addEventListener('click', closeNewsModal);
+    if (newsSaveBtn) newsSaveBtn.addEventListener('click', saveNewsFromModal);
+    if (adminAddBtn) adminAddBtn.addEventListener('click', () => openNewsModal());
+    if (adminUpdateBtn) adminUpdateBtn.addEventListener('click', updateAllNews);
+    if (refreshBtn) refreshBtn.addEventListener('click', updateAllNews);
+    
+    // Закрытие модалок по клику вне окна
+    window.addEventListener('click', (e) => {
+        if (e.target === authModal) closeModal();
+        if (e.target === newsModal) closeNewsModal();
+    });
+    
+    // Закрытие по Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            closeNewsModal();
+        }
+    });
     
     updateUserUI();
     renderNews();
+    saveNewsToStorage();
     
-    console.log('Инициализация завершена, в базе данных:', contentDatabase.length, 'записей');
+    console.log('Инициализация завершена');
 });
 
 // Делаем функции глобальными для доступа из HTML
 window.toggleFavorite = toggleFavorite;
 window.addCurrentToRecent = addCurrentToRecent;
 window.openModal = openModal;
-window.editNewsModal = editNewsModal;
-window.showAddNewsModal = showAddNewsModal;
+window.closeModal = closeModal;
+window.openNewsModal = openNewsModal;
+window.closeNewsModal = closeNewsModal;
+window.saveNewsFromModal = saveNewsFromModal;
+window.performSearch = performSearch;
+window.navigateTo = navigateTo;
+window.updateAllNews = updateAllNews;
