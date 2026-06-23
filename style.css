@@ -358,7 +358,6 @@ body {
 .link-btn:hover {
     background: #e0e0e0;
 }
-
 /* ========== НОВОСТИ ========== */
 .news-section {
     margin-top: 2rem;
@@ -376,20 +375,34 @@ body {
 }
 
 .section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.3rem;
+    font-weight: 700;
     color: #1a1a1a;
+    letter-spacing: -0.5px;
+}
+
+.section-title i {
+    color: #2b6ef0;
+    margin-right: 0.5rem;
 }
 
 .refresh-news-btn {
     background: #1a1a1a;
     color: white;
     border: none;
-    padding: 0.4rem 1rem;
-    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.7rem;
-    margin-right: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.refresh-news-btn:hover {
+    background: #333;
 }
 
 .news-time {
@@ -397,25 +410,34 @@ body {
     color: #bbb;
 }
 
+/* ===== СЕТКА НОВОСТЕЙ (КАРТОЧКИ) ===== */
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 1.2rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
 }
 
+/* ===== КАРТОЧКА НОВОСТИ ===== */
 .news-card {
     background: #fafafa;
     border: 1px solid #ebebeb;
-    border-radius: 14px;
-    padding: 1.2rem;
-    transition: all 0.2s;
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
 .news-card:hover {
     border-color: #d0d0d0;
     background: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
 }
 
+/* ===== ВЕРХНЯЯ ЧАСТЬ КАРТОЧКИ ===== */
 .news-header {
     display: flex;
     justify-content: space-between;
@@ -426,40 +448,159 @@ body {
 }
 
 .news-category {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
-    color: #aaa;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #2b6ef0;
+    background: #eef4ff;
+    padding: 0.2rem 0.8rem;
+    border-radius: 30px;
+    display: inline-block;
 }
 
 .news-date {
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     color: #bbb;
+    font-weight: 400;
 }
 
+/* ===== ЗАГОЛОВОК НОВОСТИ ===== */
 .news-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
     color: #1a1a1a;
-    cursor: pointer;
+    line-height: 1.3;
+    transition: color 0.2s;
 }
 
+.news-card:hover .news-title {
+    color: #2b6ef0;
+}
+
+/* ===== ОПИСАНИЕ НОВОСТИ ===== */
 .news-desc {
-    font-size: 0.8rem;
-    color: #666;
-    line-height: 1.45;
+    font-size: 0.85rem;
+    color: #555;
+    line-height: 1.5;
     margin-bottom: 0.75rem;
+    flex: 1;
 }
 
+/* ===== ССЫЛКА "ЧИТАТЬ ПОДРОБНЕЕ" ===== */
 .news-link {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     color: #1a1a1a;
-    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+    transition: color 0.2s;
 }
 
+.news-link:hover {
+    color: #2b6ef0;
+}
+
+.news-link i {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+}
+
+.news-card:hover .news-link i {
+    transform: translateX(4px);
+}
+
+/* ===== ДЛЯ АДМИНА (кнопки редактирования) ===== */
+.news-admin-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.edit-news-btn,
+.delete-news-btn {
+    background: #f1f5f9;
+    border: none;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.edit-news-btn:hover {
+    background: #e2e8f0;
+}
+
+.delete-news-btn {
+    color: #c0392b;
+}
+
+.delete-news-btn:hover {
+    background: #fee2e2;
+}
+
+/* ===== ЗВЁЗДОЧКА ИЗБРАННОГО ===== */
 .favorite-star-btn {
     background: none;
     border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #ddd;
+    transition: 0.2s;
+    padding: 0 4px;
+    margin-left: auto;
+}
+
+.favorite-star-btn:hover {
+    color: #f59e0b;
+    transform: scale(1.1);
+}
+
+.favorite-star-btn.active {
+    color: #f59e0b;
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+    .news-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .news-card {
+        padding: 1.2rem;
+    }
+
+    .news-title {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-card {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .news-title {
+        font-size: 0.95rem;
+    }
+
+    .news-desc {
+        font-size: 0.8rem;
+    }
+}
+border: none;
     font-size: 1rem;
     cursor: pointer;
     color: #ccc;
