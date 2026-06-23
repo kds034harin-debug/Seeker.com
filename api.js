@@ -1,68 +1,59 @@
-// ========== API КИНОПОИСКА (Фильмы и сериалы) ==========
+// ============================================================
+// ========== НАСТРОЙКА API КЛЮЧЕЙ ==========
+// ============================================================
+
+// 1. Кинопоиск
 const KINOPOISK_API_KEY = 'd0fa7c30-6035-4f8c-907b-0e7c81738ee3';
 const KINOPOISK_API_URL = 'https://kinopoiskapiunofficial.tech/api';
 
-// Количество страниц для загрузки (максимум)
+// 2. IGDB / Twitch (для игр) - ВАШИ ДАННЫЕ
+const IGDB_CLIENT_ID = 'ioi10i8wb2uk3fo6cjg30wxfe5e40w';
+const IGDB_ACCESS_TOKEN = '_______ПОЛУЧИТЬ_ЧЕРЕЗ_ЗАПРОС_______';
+
+// 3. Google Books
+const GOOGLE_BOOKS_API_KEY = '';
+
+// 4. NewsAPI - ОТКЛЮЧАЕМ (ошибка SSL)
+const USE_NEWS_API = false; // ← ВЫКЛЮЧАЕМ NewsAPI
+
+// ============================================================
+// ========== КОНЕЦ НАСТРОЙКИ ==========
+// ============================================================
+
 const MAX_PAGES = 5;
 const FILMS_PER_PAGE = 10;
 
-// ========== НОВОСТНЫЕ ИСТОЧНИКИ ==========
+// ========== НОВОСТНЫЕ ИСТОЧНИКИ (только RSS) ==========
 const NEWS_SOURCES = {
-    // Российские источники
     KINOPOISK: {
         name: 'Кинопоиск',
-        url: 'https://www.kinopoisk.ru/news/',
+        url: 'https://www.kinopoisk.ru/news/rss/',
         icon: '🎬',
-        category: 'Фильмы и сериалы'
+        category: 'Фильмы'
     },
     FILM_RU: {
         name: 'Film.ru',
-        url: 'https://www.film.ru/news',
+        url: 'https://www.film.ru/rss/news',
         icon: '📽️',
         category: 'Кино'
     },
-    ROSSIYSKAYA_GAZETA: {
-        name: 'Российская газета - Культура',
-        url: 'https://rg.ru/tema/kultura/',
-        icon: '📰',
-        category: 'Культура'
-    },
-    
-    // Международные источники
     IGN: {
         name: 'IGN Russia',
-        url: 'https://www.ign.com/',
+        url: 'https://www.ign.com/rss/articles',
         icon: '🎮',
         category: 'Игры'
     },
-    GAME_RU: {
-        name: 'Game.ru',
-        url: 'https://www.game.ru/news',
-        icon: '🕹️',
-        category: 'Игры'
-    },
-    
-    // Книжные источники
     LITRES: {
         name: 'ЛитРес',
-        url: 'https://www.litres.ru/news/',
+        url: 'https://www.litres.ru/static/rss/news.xml',
         icon: '📚',
         category: 'Книги'
-    },
-    
-    // Агрегаторы новостей
-    YANDEX_NEWS: {
-        name: 'Яндекс.Новости - Кино',
-        url: 'https://news.yandex.ru/culture/cinema.html',
-        icon: '📱',
-        category: 'Кино'
     }
 };
 
-// ========== RSS ПАРСИНГ (для загрузки новостей) ==========
+// ========== RSS ПАРСИНГ ==========
 async function fetchRSSFeed(url) {
     try {
-        // Используем прокси для обхода CORS
         const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const response = await fetch(proxyUrl + encodeURIComponent(url));
         
@@ -75,7 +66,6 @@ async function fetchRSSFeed(url) {
         const parser = new DOMParser();
         const xml = parser.parseFromString(text, 'text/xml');
         
-        // Парсим RSS
         const items = xml.querySelectorAll('item');
         const news = [];
         
@@ -86,16 +76,17 @@ async function fetchRSSFeed(url) {
             const pubDate = item.querySelector('pubDate')?.textContent || '';
             const category = item.querySelector('category')?.textContent || '';
             
-            // Очищаем описание от HTML-тегов
             const cleanDescription = description.replace(/<[^>]*>/g, '').trim();
             
-            news.push({
-                title: title.trim(),
-                description: cleanDescription.substring(0, 300),
-                url: link,
-                date: pubDate ? new Date(pubDate).toLocaleString() : new Date().toLocaleString(),
-                category: category || 'Новости'
-            });
+            if (title) {
+                news.push({
+                    title: title.trim(),
+                    description: cleanDescription.substring(0, 300) || 'Описание отсутствует',
+                    url: link || '#',
+                    date: pubDate ? new Date(pubDate).toLocaleString() : new Date().toLocaleString(),
+                    category: category || 'Новости'
+                });
+            }
         });
         
         return news;
@@ -105,161 +96,34 @@ async function fetchRSSFeed(url) {
     }
 }
 
-// ========== ЗАГРУЗКА НОВОСТЕЙ С РАЗНЫХ ИСТОЧНИКОВ ==========
-async function fetchNewsFromSources() {
+// ========== ЗАГРУЗКА НОВОСТЕЙ ИЗ ВСЕХ RSS ИСТОЧНИКОВ ==========
+async function fetchAllNewsFromRSS() {
+    console.log('📰 Загрузка новостей из RSS...');
     const allNews = [];
-    const sources = [
-        // Добавляем RSS-ленты
-        'https://www.kinopoisk.ru/news/rss/',
-        'https://www.film.ru/rss/news',
-        'https://www.ign.com/rss/articles',
-        'https://www.litres.ru/static/rss/news.xml',
-        // Можно добавить еще источники
-        'https://news.yandex.ru/culture/cinema.rss'
-    ];
     
     try {
-        // Загружаем новости из всех источников параллельно
+        const sources = [
+            'https://www.kinopoisk.ru/news/rss/',
+            'https://www.film.ru/rss/news',
+            'https://www.ign.com/rss/articles',
+            'https://www.litres.ru/static/rss/news.xml',
+            'https://www.rbc.ru/rss/culture/',
+            'https://www.kommersant.ru/RSS/news-culture.xml'
+        ];
+        
         const promises = sources.map(function(source) {
             return fetchRSSFeed(source);
         });
         
         const results = await Promise.all(promises);
         
-        // Объединяем все новости
         results.forEach(function(newsList) {
             if (newsList && newsList.length > 0) {
                 allNews.push.apply(allNews, newsList);
             }
         });
         
-        // Сортируем по дате (сначала свежие)
-        allNews.sort(function(a, b) {
-            var dateA = new Date(a.date);
-            var dateB = new Date(b.date);
-            return dateB - dateA;
-        });
-        
-        return allNews;
-    } catch (error) {
-        console.error('Ошибка загрузки новостей:', error);
-        return [];
-    }
-}
-
-// ========== ПОЛУЧЕНИЕ НОВОСТЕЙ О КИНО ==========
-async function getMovieNews() {
-    try {
-        const response = await fetch('https://newsapi.org/v2/everything?q=кино+фильмы+кинопремьеры&language=ru&sortBy=publishedAt&pageSize=20');
-        
-        if (!response.ok) {
-            console.log('NewsAPI не доступен, используем резервный источник');
-            // Если NewsAPI не работает, используем наши RSS-ленты
-            return await fetchNewsFromSources();
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.articles && data.articles.length > 0) {
-            return data.articles.map(function(article) {
-                return {
-                    title: article.title || 'Без названия',
-                    description: article.description || 'Описание отсутствует',
-                    url: article.url || '#',
-                    date: article.publishedAt ? new Date(article.publishedAt).toLocaleString() : new Date().toLocaleString(),
-                    category: 'Кино',
-                    source: article.source?.name || 'Кинопоиск',
-                    image: article.urlToImage || null
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка получения новостей о кино:', error);
-        return await fetchNewsFromSources();
-    }
-}
-
-// ========== ПОЛУЧЕНИЕ НОВОСТЕЙ ОБ ИГРАХ ==========
-async function getGameNews() {
-    try {
-        const response = await fetch('https://newsapi.org/v2/everything?q=игры+гейминг+новости+игр&language=ru&sortBy=publishedAt&pageSize=20');
-        
-        if (!response.ok) {
-            console.log('NewsAPI не доступен, используем резервный источник');
-            return await fetchNewsFromSources();
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.articles && data.articles.length > 0) {
-            return data.articles.map(function(article) {
-                return {
-                    title: article.title || 'Без названия',
-                    description: article.description || 'Описание отсутствует',
-                    url: article.url || '#',
-                    date: article.publishedAt ? new Date(article.publishedAt).toLocaleString() : new Date().toLocaleString(),
-                    category: 'Игры',
-                    source: article.source?.name || 'Игромания',
-                    image: article.urlToImage || null
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка получения новостей об играх:', error);
-        return await fetchNewsFromSources();
-    }
-}
-
-// ========== ПОЛУЧЕНИЕ НОВОСТЕЙ О КНИГАХ ==========
-async function getBookNews() {
-    try {
-        const response = await fetch('https://newsapi.org/v2/everything?q=книги+литература+новинки+книг&language=ru&sortBy=publishedAt&pageSize=15');
-        
-        if (!response.ok) {
-            console.log('NewsAPI не доступен, используем резервный источник');
-            return await fetchNewsFromSources();
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.articles && data.articles.length > 0) {
-            return data.articles.map(function(article) {
-                return {
-                    title: article.title || 'Без названия',
-                    description: article.description || 'Описание отсутствует',
-                    url: article.url || '#',
-                    date: article.publishedAt ? new Date(article.publishedAt).toLocaleString() : new Date().toLocaleString(),
-                    category: 'Книги',
-                    source: article.source?.name || 'ЛитРес',
-                    image: article.urlToImage || null
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка получения новостей о книгах:', error);
-        return await fetchNewsFromSources();
-    }
-}
-
-// ========== УНИВЕРСАЛЬНАЯ ЗАГРУЗКА ВСЕХ НОВОСТЕЙ ==========
-async function fetchAllNews() {
-    console.log('📰 Загрузка новостей...');
-    
-    try {
-        // Загружаем новости из всех категорий параллельно
-        const [movieNews, gameNews, bookNews] = await Promise.all([
-            getMovieNews(),
-            getGameNews(),
-            getBookNews()
-        ]);
-        
-        // Объединяем все новости
-        const allNews = movieNews.concat(gameNews).concat(bookNews);
-        
-        // Удаляем дубликаты по заголовку
+        // Удаляем дубликаты
         const uniqueNews = [];
         const titles = {};
         
@@ -270,19 +134,56 @@ async function fetchAllNews() {
             }
         });
         
-        // Сортируем по дате (сначала свежие)
+        // Сортируем по дате
         uniqueNews.sort(function(a, b) {
             var dateA = new Date(a.date);
             var dateB = new Date(b.date);
             return dateB - dateA;
         });
         
-        console.log('✅ Загружено новостей:', uniqueNews.length);
-        return uniqueNews;
+        console.log('✅ Загружено новостей из RSS:', uniqueNews.length);
+        return uniqueNews.slice(0, 50); // Берём только 50 последних
     } catch (error) {
-        console.error('Ошибка загрузки новостей:', error);
+        console.error('Ошибка загрузки RSS новостей:', error);
         return [];
     }
+}
+
+// ========== ПОЛУЧЕНИЕ НОВОСТЕЙ ПО КАТЕГОРИЯМ (из RSS) ==========
+async function getMovieNews() {
+    const allNews = await fetchAllNewsFromRSS();
+    return allNews.filter(function(news) {
+        return news.category === 'Фильмы' || 
+               news.category === 'Кино' || 
+               news.title.toLowerCase().includes('фильм') ||
+               news.title.toLowerCase().includes('кино') ||
+               news.title.toLowerCase().includes('премьер');
+    });
+}
+
+async function getGameNews() {
+    const allNews = await fetchAllNewsFromRSS();
+    return allNews.filter(function(news) {
+        return news.category === 'Игры' || 
+               news.title.toLowerCase().includes('игр') ||
+               news.title.toLowerCase().includes('гейм') ||
+               news.title.toLowerCase().includes('dota') ||
+               news.title.toLowerCase().includes('steam');
+    });
+}
+
+async function getBookNews() {
+    const allNews = await fetchAllNewsFromRSS();
+    return allNews.filter(function(news) {
+        return news.category === 'Книги' || 
+               news.title.toLowerCase().includes('книг') ||
+               news.title.toLowerCase().includes('литератур');
+    });
+}
+
+async function fetchAllNews() {
+    console.log('📰 Загрузка всех новостей...');
+    return await fetchAllNewsFromRSS();
 }
 
 // ========== API КИНОПОИСКА ==========
@@ -432,9 +333,6 @@ async function getFilmDetails(filmId) {
 }
 
 // ========== API ДЛЯ ИГР (IGDB / Twitch) ==========
-const IGDB_CLIENT_ID = 'tno0fgk7ughap8xc08hoe2b44osst0';
-const IGDB_ACCESS_TOKEN = 'ioi10i8wb2uk3fo6cjg30wxfe5e40w'; // Вставьте свой Access Token
-
 async function searchIGDB(query) {
     if (!query || query.trim() === '') return [];
     if (!IGDB_CLIENT_ID || !IGDB_ACCESS_TOKEN) {
@@ -499,9 +397,12 @@ async function searchGoogleBooks(query) {
     if (!query || query.trim() === '') return [];
     
     try {
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=10';
+        var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=10';
+        if (GOOGLE_BOOKS_API_KEY) {
+            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
+        }
         
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
         const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
         
         if (!response.ok) {
@@ -575,7 +476,6 @@ async function updateNewsDatabase() {
         const news = await fetchAllNews();
         
         if (news && news.length > 0) {
-            // Сохраняем новости в localStorage
             localStorage.setItem('seeker_news', JSON.stringify(news));
             console.log('✅ Новости обновлены, добавлено:', news.length);
             return news;
@@ -583,6 +483,53 @@ async function updateNewsDatabase() {
         return [];
     } catch (error) {
         console.error('Ошибка обновления новостей:', error);
+        return [];
+    }
+}
+
+// ========== ПОЛУЧЕНИЕ ПОПУЛЯРНЫХ ФИЛЬМОВ ==========
+async function getPopularFilms(page) {
+    page = page || 1;
+    try {
+        const url = KINOPOISK_API_URL + 
+            '/v2.2/films/top?type=TOP_100_POPULAR&page=' + page;
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-API-KEY': KINOPOISK_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('API ошибка:', response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        
+        if (data && data.films && data.films.length > 0) {
+            return data.films.map(function(film) {
+                return {
+                    id: 'kp_' + film.filmId,
+                    type: film.type === "TV_SERIES" ? "series" : "movie",
+                    title: film.nameRu || film.nameEn || 'Без названия',
+                    year: film.year,
+                    rating: film.rating,
+                    description: film.description || "Описание отсутствует",
+                    image: film.posterUrl || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image',
+                    director: "—",
+                    cast: "—",
+                    duration: "—",
+                    source: "Кинопоиск",
+                    links: { watch: "https://www.kinopoisk.ru/film/" + film.filmId + "/" }
+                };
+            });
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка получения популярных фильмов:', error);
         return [];
     }
 }
@@ -598,10 +545,13 @@ window.updateNewsDatabase = updateNewsDatabase;
 window.getMovieNews = getMovieNews;
 window.getGameNews = getGameNews;
 window.getBookNews = getBookNews;
-window.fetchNewsFromSources = fetchNewsFromSources;
+window.getPopularFilms = getPopularFilms;
+window.fetchAllNewsFromRSS = fetchAllNewsFromRSS;
 
 console.log('✅ API модуль загружен');
-console.log('📌 Кинопоиск API: ' + (KINOPOISK_API_KEY ? '✅ настроен' : '❌ не настроен'));
-console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен (опционально)'));
-console.log('📌 Google Books API: ✅ настроен (без ключа)');
-console.log('📌 Новостные источники: ✅ загружены');
+console.log('📌 Кинопоиск API: ✅ настроен');
+console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен'));
+console.log('📌 Google Books API: ✅ работает без ключа');
+console.log('📌 NewsAPI: ❌ ОТКЛЮЧЕН (SSL ошибка)');
+console.log('📌 RSS новости: ✅ загружены');
+console.log('📌 Максимальное количество страниц для поиска:', MAX_PAGES);
