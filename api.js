@@ -37,6 +37,74 @@ if (!KINOPOISK_API_KEY) {
 }
 
 // ========== API КИНОПОИСКА (Фильмы и сериалы) ==========
+// ========== API КИНОПОИСКА ==========
+const KINOPOISK_API_KEY = 'd0fa7c30-6035-4f8c-907b-0e7c81738ee3';
+const KINOPOISK_API_URL = 'https://kinopoiskapiunofficial.tech/api';
+
+// Функция поиска через API Кинопоиска
+async function searchKinopoiskAPI(query) {
+    try {
+        const url = KINOPOISK_API_URL + '/v2.1/films/search-by-keyword?keyword=' + encodeURIComponent(query) + '&page=1';
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-API-KEY': KINOPOISK_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            console.error('API ошибка:', response.status);
+            return [];
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.films && data.films.length > 0) {
+            return data.films.map(function(film) {
+                return {
+                    id: film.filmId,
+                    type: film.type === "TV_SERIES" ? "series" : "movie",
+                    title: film.nameRu || film.nameEn || 'Без названия',
+                    year: film.year,
+                    rating: film.rating,
+                    description: film.description || "Описание отсутствует",
+                    image: film.posterUrl || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image',
+                    director: "—",
+                    cast: "—",
+                    duration: "—",
+                    links: { watch: "https://www.kinopoisk.ru/film/" + film.filmId + "/" }
+                };
+            });
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка API Кинопоиска:', error);
+        return [];
+    }
+}
+
+// Функция получения детальной информации о фильме по ID
+async function getFilmDetails(filmId) {
+    try {
+        const url = KINOPOISK_API_URL + '/v2.2/films/' + filmId;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-API-KEY': KINOPOISK_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (error) {
+        console.error('Ошибка получения деталей:', error);
+        return null;
+    }
+}
+
+console.log('✅ API Кинопоиска загружен');
 async function searchKinopoiskAPI(query) {
     if (!KINOPOISK_API_KEY) {
         console.log('Кинопоиск API не настроен');
