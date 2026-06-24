@@ -6,15 +6,16 @@
 const KINOPOISK_API_KEY = 'd0fa7c30-6035-4f8c-907b-0e7c81738ee3';
 const KINOPOISK_API_URL = 'https://kinopoiskapiunofficial.tech/api';
 
-// 2. IGDB / Twitch (для игр) - ВАШИ ДАННЫЕ
-const IGDB_CLIENT_ID = 'ioi10i8wb2uk3fo6cjg30wxfe5e40w';
-const IGDB_ACCESS_TOKEN = '_______ПОЛУЧИТЬ_ЧЕРЕЗ_ЗАПРОС_______';
+// 2. IGDB / Twitch (для игр) - ВСТАВЬТЕ СВОИ КЛЮЧИ
+const IGDB_CLIENT_ID = ''; // Вставьте Client-ID
+const IGDB_ACCESS_TOKEN = ''; // Вставьте Access Token
 
-// 3. Google Books
-const GOOGLE_BOOKS_API_KEY = 'AIzaSyAjhurxN3r8j4MjEzFDW6fIBXkgKDZzbOs';
+// 3. Google Books - ВСТАВЬТЕ СВОЙ КЛЮЧ
+// Получить: https://console.cloud.google.com/ → APIs & Services → Credentials
+const GOOGLE_BOOKS_API_KEY = 'AIzaSyAjhurxN3r8j4MjEzFDW6fIBXkgKDZzbOs'; // Вставьте свой ключ
 
 // 4. NewsAPI - ОТКЛЮЧАЕМ (ошибка SSL)
-const USE_NEWS_API = false; // ← ВЫКЛЮЧАЕМ NewsAPI
+const USE_NEWS_API = false;
 
 // ============================================================
 // ========== КОНЕЦ НАСТРОЙКИ ==========
@@ -23,185 +24,22 @@ const USE_NEWS_API = false; // ← ВЫКЛЮЧАЕМ NewsAPI
 const MAX_PAGES = 5;
 const FILMS_PER_PAGE = 10;
 
-// ========== НОВОСТНЫЕ ИСТОЧНИКИ (только RSS) ==========
-const NEWS_SOURCES = {
-    KINOPOISK: {
-        name: 'Кинопоиск',
-        url: 'https://www.kinopoisk.ru/news/rss/',
-        icon: '🎬',
-        category: 'Фильмы'
-    },
-    FILM_RU: {
-        name: 'Film.ru',
-        url: 'https://www.film.ru/rss/news',
-        icon: '📽️',
-        category: 'Кино'
-    },
-    IGN: {
-        name: 'IGN Russia',
-        url: 'https://www.ign.com/rss/articles',
-        icon: '🎮',
-        category: 'Игры'
-    },
-    LITRES: {
-        name: 'ЛитРес',
-        url: 'https://www.litres.ru/static/rss/news.xml',
-        icon: '📚',
-        category: 'Книги'
-    }
-};
-
-// ========== RSS ПАРСИНГ ==========
-async function fetchRSSFeed(url) {
-    try {
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(url));
-        
-        if (!response.ok) {
-            console.error('Ошибка загрузки RSS:', response.status);
-            return null;
-        }
-        
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'text/xml');
-        
-        const items = xml.querySelectorAll('item');
-        const news = [];
-        
-        items.forEach(function(item) {
-            const title = item.querySelector('title')?.textContent || '';
-            const description = item.querySelector('description')?.textContent || '';
-            const link = item.querySelector('link')?.textContent || '';
-            const pubDate = item.querySelector('pubDate')?.textContent || '';
-            const category = item.querySelector('category')?.textContent || '';
-            
-            const cleanDescription = description.replace(/<[^>]*>/g, '').trim();
-            
-            if (title) {
-                news.push({
-                    title: title.trim(),
-                    description: cleanDescription.substring(0, 300) || 'Описание отсутствует',
-                    url: link || '#',
-                    date: pubDate ? new Date(pubDate).toLocaleString() : new Date().toLocaleString(),
-                    category: category || 'Новости'
-                });
-            }
-        });
-        
-        return news;
-    } catch (error) {
-        console.error('Ошибка парсинга RSS:', error);
-        return null;
-    }
-}
-
-// ========== ЗАГРУЗКА НОВОСТЕЙ ИЗ ВСЕХ RSS ИСТОЧНИКОВ ==========
-async function fetchAllNewsFromRSS() {
-    console.log('📰 Загрузка новостей из RSS...');
-    const allNews = [];
-    
-    try {
-        const sources = [
-            'https://www.kinopoisk.ru/news/rss/',
-            'https://www.film.ru/rss/news',
-            'https://www.ign.com/rss/articles',
-            'https://www.litres.ru/static/rss/news.xml',
-            'https://www.rbc.ru/rss/culture/',
-            'https://www.kommersant.ru/RSS/news-culture.xml'
-        ];
-        
-        const promises = sources.map(function(source) {
-            return fetchRSSFeed(source);
-        });
-        
-        const results = await Promise.all(promises);
-        
-        results.forEach(function(newsList) {
-            if (newsList && newsList.length > 0) {
-                allNews.push.apply(allNews, newsList);
-            }
-        });
-        
-        // Удаляем дубликаты
-        const uniqueNews = [];
-        const titles = {};
-        
-        allNews.forEach(function(news) {
-            if (!titles[news.title]) {
-                titles[news.title] = true;
-                uniqueNews.push(news);
-            }
-        });
-        
-        // Сортируем по дате
-        uniqueNews.sort(function(a, b) {
-            var dateA = new Date(a.date);
-            var dateB = new Date(b.date);
-            return dateB - dateA;
-        });
-        
-        console.log('✅ Загружено новостей из RSS:', uniqueNews.length);
-        return uniqueNews.slice(0, 50); // Берём только 50 последних
-    } catch (error) {
-        console.error('Ошибка загрузки RSS новостей:', error);
-        return [];
-    }
-}
-
-// ========== ПОЛУЧЕНИЕ НОВОСТЕЙ ПО КАТЕГОРИЯМ (из RSS) ==========
-async function getMovieNews() {
-    const allNews = await fetchAllNewsFromRSS();
-    return allNews.filter(function(news) {
-        return news.category === 'Фильмы' || 
-               news.category === 'Кино' || 
-               news.title.toLowerCase().includes('фильм') ||
-               news.title.toLowerCase().includes('кино') ||
-               news.title.toLowerCase().includes('премьер');
-    });
-}
-
-async function getGameNews() {
-    const allNews = await fetchAllNewsFromRSS();
-    return allNews.filter(function(news) {
-        return news.category === 'Игры' || 
-               news.title.toLowerCase().includes('игр') ||
-               news.title.toLowerCase().includes('гейм') ||
-               news.title.toLowerCase().includes('dota') ||
-               news.title.toLowerCase().includes('steam');
-    });
-}
-
-async function getBookNews() {
-    const allNews = await fetchAllNewsFromRSS();
-    return allNews.filter(function(news) {
-        return news.category === 'Книги' || 
-               news.title.toLowerCase().includes('книг') ||
-               news.title.toLowerCase().includes('литератур');
-    });
-}
-
-async function fetchAllNews() {
-    console.log('📰 Загрузка всех новостей...');
-    return await fetchAllNewsFromRSS();
-}
-
 // ========== API КИНОПОИСКА ==========
 async function searchKinopoiskAPI(query) {
     if (!query || query.trim() === '') return [];
 
     console.log('🔍 Поиск на Кинопоиске:', query);
     
-    let allFilms = [];
-    let totalPages = 0;
+    var allFilms = [];
+    var totalPages = 0;
 
     try {
-        const firstUrl = KINOPOISK_API_URL + 
+        var firstUrl = KINOPOISK_API_URL + 
             '/v2.1/films/search-by-keyword?keyword=' + 
             encodeURIComponent(query) + 
             '&page=1';
 
-        const firstResponse = await fetch(firstUrl, {
+        var firstResponse = await fetch(firstUrl, {
             method: 'GET',
             headers: {
                 'X-API-KEY': KINOPOISK_API_KEY,
@@ -214,7 +52,7 @@ async function searchKinopoiskAPI(query) {
             return [];
         }
 
-        const firstData = await firstResponse.json();
+        var firstData = await firstResponse.json();
         
         if (!firstData.films || firstData.films.length === 0) {
             console.log('❌ Ничего не найдено');
@@ -225,7 +63,7 @@ async function searchKinopoiskAPI(query) {
         
         console.log('📊 Всего найдено:', firstData.total || firstData.films.length, 'фильмов, страниц:', totalPages);
 
-        const firstPageFilms = firstData.films.map(function(film) {
+        var firstPageFilms = firstData.films.map(function(film) {
             return {
                 id: 'kp_' + film.filmId,
                 type: film.type === "TV_SERIES" ? "series" : "movie",
@@ -244,17 +82,17 @@ async function searchKinopoiskAPI(query) {
 
         allFilms = allFilms.concat(firstPageFilms);
 
-        const pagesToLoad = Math.min(totalPages, MAX_PAGES);
+        var pagesToLoad = Math.min(totalPages, MAX_PAGES);
 
-        for (let page = 2; page <= pagesToLoad; page++) {
+        for (var page = 2; page <= pagesToLoad; page++) {
             console.log('📄 Загрузка страницы', page, 'из', pagesToLoad);
 
-            const url = KINOPOISK_API_URL + 
+            var url = KINOPOISK_API_URL + 
                 '/v2.1/films/search-by-keyword?keyword=' + 
                 encodeURIComponent(query) + 
                 '&page=' + page;
 
-            const response = await fetch(url, {
+            var response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'X-API-KEY': KINOPOISK_API_KEY,
@@ -267,13 +105,13 @@ async function searchKinopoiskAPI(query) {
                 continue;
             }
 
-            const data = await response.json();
+            var data = await response.json();
 
             if (!data.films || data.films.length === 0) {
                 break;
             }
 
-            const pageFilms = data.films.map(function(film) {
+            var pageFilms = data.films.map(function(film) {
                 return {
                     id: 'kp_' + film.filmId,
                     type: film.type === "TV_SERIES" ? "series" : "movie",
@@ -296,7 +134,7 @@ async function searchKinopoiskAPI(query) {
                 break;
             }
 
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(function(resolve) { setTimeout(resolve, 200); });
         }
 
         console.log('✅ Загружено фильмов:', allFilms.length);
@@ -305,30 +143,6 @@ async function searchKinopoiskAPI(query) {
     } catch (error) {
         console.error('Ошибка API Кинопоиска:', error);
         return [];
-    }
-}
-
-// ========== ФУНКЦИЯ ПОЛУЧЕНИЯ ДЕТАЛЬНОЙ ИНФОРМАЦИИ ==========
-async function getFilmDetails(filmId) {
-    try {
-        const url = KINOPOISK_API_URL + '/v2.2/films/' + filmId;
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-API-KEY': KINOPOISK_API_KEY,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            console.error('Ошибка получения деталей:', response.status);
-            return null;
-        }
-        
-        return await response.json();
-    } catch (error) {
-        console.error('Ошибка получения деталей:', error);
-        return null;
     }
 }
 
@@ -341,10 +155,10 @@ async function searchIGDB(query) {
     }
     
     try {
-        const url = 'https://api.igdb.com/v4/games';
-        const searchQuery = 'search "' + query + '"; fields name,summary,first_release_date,cover.url,genres.name,platforms.name,rating,total_rating,involved_companies.company.name; limit 10;';
+        var url = 'https://api.igdb.com/v4/games';
+        var searchQuery = 'search "' + query + '"; fields name,summary,first_release_date,cover.url,genres.name,platforms.name,rating,total_rating,involved_companies.company.name; limit 10;';
         
-        const response = await fetch(url, {
+        var response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Client-ID': IGDB_CLIENT_ID,
@@ -359,7 +173,7 @@ async function searchIGDB(query) {
             return [];
         }
         
-        const data = await response.json();
+        var data = await response.json();
         
         if (data && data.length > 0) {
             return data.map(function(game) {
@@ -392,184 +206,33 @@ async function searchIGDB(query) {
     }
 }
 
-// ========== API ДЛЯ КНИГ (Google Books) ==========
-async function searchGoogleBooks(query) {
-    if (!query || query.trim() === '') return [];
-    
-    try {
-        var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + encodeURIComponent(query) + '&maxResults=10';
-        if (GOOGLE_BOOKS_API_KEY) {
-            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
-        }
-        
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-        
-        if (!response.ok) {
-            console.error('Google Books API ошибка:', response.status);
-            return [];
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.items && data.items.length > 0) {
-            return data.items.map(function(book) {
-                var volume = book.volumeInfo || {};
-                var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
-                var imageUrl = volume.imageLinks && volume.imageLinks.thumbnail ? volume.imageLinks.thumbnail : 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-                var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
-                var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
-                var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
-                
-                return {
-                    id: 'book_' + book.id,
-                    type: "book",
-                    title: volume.title || 'Без названия',
-                    year: publishedYear,
-                    rating: rating,
-                    description: description.substring(0, 300),
-                    image: imageUrl,
-                    author: authors,
-                    pages: volume.pageCount || "—",
-                    source: "Google Books",
-                    links: { buy: volume.infoLink || '#' }
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка Google Books:', error);
-        return [];
-    }
-}
-
-// ========== УНИВЕРСАЛЬНЫЙ ПОИСК ==========
-async function searchAllAPIs(query) {
-    console.log('🔍 Универсальный поиск по запросу:', query);
-    
-    try {
-        const [movies, games, books] = await Promise.all([
-            searchKinopoiskAPI(query),
-            searchIGDB(query),
-            searchGoogleBooks(query)
-        ]);
-        
-        var allResults = movies.concat(games).concat(books);
-        
-        console.log('📊 Результаты: фильмы/сериалы - ' + movies.length + 
-                   ', игры - ' + games.length + 
-                   ', книги - ' + books.length +
-                   ', всего - ' + allResults.length);
-        
-        return allResults;
-    } catch (error) {
-        console.error('Ошибка при поиске:', error);
-        return [];
-    }
-}
-
-// ========== ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ НОВОСТЕЙ ==========
-async function updateNewsDatabase() {
-    console.log('🔄 Обновление новостей...');
-    
-    try {
-        const news = await fetchAllNews();
-        
-        if (news && news.length > 0) {
-            localStorage.setItem('seeker_news', JSON.stringify(news));
-            console.log('✅ Новости обновлены, добавлено:', news.length);
-            return news;
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка обновления новостей:', error);
-        return [];
-    }
-}
-
-// ========== ПОЛУЧЕНИЕ ПОПУЛЯРНЫХ ФИЛЬМОВ ==========
-async function getPopularFilms(page) {
-    page = page || 1;
-    try {
-        const url = KINOPOISK_API_URL + 
-            '/v2.2/films/top?type=TOP_100_POPULAR&page=' + page;
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-API-KEY': KINOPOISK_API_KEY,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            console.error('API ошибка:', response.status);
-            return [];
-        }
-
-        const data = await response.json();
-        
-        if (data && data.films && data.films.length > 0) {
-            return data.films.map(function(film) {
-                return {
-                    id: 'kp_' + film.filmId,
-                    type: film.type === "TV_SERIES" ? "series" : "movie",
-                    title: film.nameRu || film.nameEn || 'Без названия',
-                    year: film.year,
-                    rating: film.rating,
-                    description: film.description || "Описание отсутствует",
-                    image: film.posterUrl || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image',
-                    director: "—",
-                    cast: "—",
-                    duration: "—",
-                    source: "Кинопоиск",
-                    links: { watch: "https://www.kinopoisk.ru/film/" + film.filmId + "/" }
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка получения популярных фильмов:', error);
-        return [];
-    }
-}
-// ========== API ДЛЯ КНИГ (Google Books) ==========
-// ВСТАВИТЬ ЭТОТ КОД В КОНЕЦ api.js, ПЕРЕД console.log
-
-// 1. НАСТРОЙКА КЛЮЧА GOOGLE BOOKS
-// Вставьте ваш ключ из Google Cloud Console
-const GOOGLE_BOOKS_API_KEY = 'ВАШ_КЛЮЧ_СЮДА'; // ← Замените на реальный ключ
-
-// 2. ОСНОВНАЯ ФУНКЦИЯ ПОИСКА КНИГ
+// ========== GOOGLE BOOKS API (ДЛЯ КНИГ) ==========
 async function searchGoogleBooks(query) {
     if (!query || query.trim() === '') return [];
     
     console.log('📚 Поиск книг в Google Books:', query);
     
     try {
-        // Формируем URL с API ключом
-        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + 
+        var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + 
                      encodeURIComponent(query) + 
                      '&maxResults=15' + 
                      '&orderBy=relevance';
         
         // Добавляем ключ, если он есть
-        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
+        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY.trim() !== '') {
             apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
         }
         
-        console.log('📡 Запрос к Google Books:', apiUrl);
-        
         // Используем прокси для обхода CORS
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        var proxyUrl = 'https://api.allorigins.win/raw?url=';
+        var response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
         
         if (!response.ok) {
             console.error('Google Books API ошибка:', response.status);
             return [];
         }
         
-        const data = await response.json();
+        var data = await response.json();
         
         if (data && data.items && data.items.length > 0) {
             console.log('✅ Найдено книг:', data.items.length);
@@ -584,14 +247,12 @@ async function searchGoogleBooks(query) {
                     imageUrl = volume.imageLinks.thumbnail || 
                                volume.imageLinks.smallThumbnail || 
                                imageUrl;
-                    // Меняем http на https
                     imageUrl = imageUrl.replace('http://', 'https://');
                 }
                 
                 var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
                 var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
                 var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
-                var ratingsCount = volume.ratingsCount || 0;
                 
                 return {
                     id: 'book_' + book.id,
@@ -618,162 +279,37 @@ async function searchGoogleBooks(query) {
     }
 }
 
-// 3. ФУНКЦИЯ ПОИСКА ПО ISBN
-async function searchBookByISBN(isbn) {
-    if (!isbn || isbn.trim() === '') return null;
-    
-    console.log('📚 Поиск книги по ISBN:', isbn);
+// ========== УНИВЕРСАЛЬНЫЙ ПОИСК ==========
+async function searchAllAPIs(query) {
+    console.log('🔍 Универсальный поиск по запросу:', query);
     
     try {
-        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' + 
-                     encodeURIComponent(isbn);
+        var movies = await searchKinopoiskAPI(query);
+        var games = await searchIGDB(query);
+        var books = await searchGoogleBooks(query);
         
-        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
-            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
-        }
+        var allResults = movies.concat(games).concat(books);
         
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        console.log('📊 Результаты:');
+        console.log('   🎬 Фильмы/сериалы:', movies.length);
+        console.log('   🎮 Игры:', games.length);
+        console.log('   📚 Книги:', books.length);
+        console.log('   📌 Всего:', allResults.length);
         
-        if (!response.ok) {
-            console.error('Google Books API ошибка:', response.status);
-            return null;
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.items && data.items.length > 0) {
-            var book = data.items[0];
-            var volume = book.volumeInfo || {};
-            var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
-            
-            var imageUrl = 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-            if (volume.imageLinks) {
-                imageUrl = volume.imageLinks.thumbnail || 
-                           volume.imageLinks.smallThumbnail || 
-                           imageUrl;
-                imageUrl = imageUrl.replace('http://', 'https://');
-            }
-            
-            var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
-            var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
-            var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
-            
-            return {
-                id: 'book_' + book.id,
-                type: "book",
-                title: volume.title || 'Без названия',
-                year: publishedYear,
-                rating: rating,
-                description: description.substring(0, 300),
-                image: imageUrl,
-                author: authors,
-                pages: volume.pageCount || "—",
-                source: "Google Books",
-                links: { 
-                    buy: volume.infoLink || '#' 
-                }
-            };
-        }
-        return null;
+        return allResults;
     } catch (error) {
-        console.error('❌ Ошибка поиска по ISBN:', error);
-        return null;
-    }
-}
-
-// 4. ФУНКЦИЯ ПОЛУЧЕНИЯ ПОПУЛЯРНЫХ КНИГ
-async function getPopularBooks() {
-    try {
-        console.log('📚 Получение популярных книг...');
-        
-        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=bestseller&maxResults=12&orderBy=relevance';
-        
-        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
-            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
-        }
-        
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
-        
-        if (!response.ok) {
-            console.error('Google Books API ошибка:', response.status);
-            return [];
-        }
-        
-        const data = await response.json();
-        
-        if (data && data.items && data.items.length > 0) {
-            return data.items.map(function(book) {
-                var volume = book.volumeInfo || {};
-                var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
-                
-                var imageUrl = 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-                if (volume.imageLinks) {
-                    imageUrl = volume.imageLinks.thumbnail || 
-                               volume.imageLinks.smallThumbnail || 
-                               imageUrl;
-                    imageUrl = imageUrl.replace('http://', 'https://');
-                }
-                
-                var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
-                var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
-                var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
-                
-                return {
-                    id: 'book_' + book.id,
-                    type: "book",
-                    title: volume.title || 'Без названия',
-                    year: publishedYear,
-                    rating: rating,
-                    description: description.substring(0, 350),
-                    image: imageUrl,
-                    author: authors,
-                    pages: volume.pageCount || "—",
-                    source: "Google Books",
-                    links: { 
-                        buy: volume.infoLink || '#' 
-                    }
-                };
-            });
-        }
-        return [];
-    } catch (error) {
-        console.error('❌ Ошибка получения популярных книг:', error);
+        console.error('❌ Ошибка при поиске:', error);
         return [];
     }
 }
 
-// 5. ФУНКЦИЯ ДЛЯ УНИВЕРСАЛЬНОГО ПОИСКА (ДОБАВЛЯЕМ КНИГИ)
-// Нужно дополнить существующую функцию searchAllAPIs
-// Найдите в api.js функцию searchAllAPIs и добавьте в неё вызов searchGoogleBooks
-
-// 6. ЭКСПОРТ ФУНКЦИЙ (ДОБАВЛЯЕМ В КОНЕЦ ФАЙЛА)
-window.searchGoogleBooks = searchGoogleBooks;
-window.searchBookByISBN = searchBookByISBN;
-window.getPopularBooks = getPopularBooks;
-
-console.log('✅ Google Books API загружен');
-console.log('📌 Google Books API: ' + (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА' ? '✅ настроен' : '⚠️ без ключа (ограниченный режим)'));
-
-// ========== ЭКСПОРТ ФУНКЦИЙ ==========
+// ========== ЭКСПОРТ ==========
 window.searchKinopoiskAPI = searchKinopoiskAPI;
-window.getFilmDetails = getFilmDetails;
 window.searchIGDB = searchIGDB;
 window.searchGoogleBooks = searchGoogleBooks;
 window.searchAllAPIs = searchAllAPIs;
-window.fetchAllNews = fetchAllNews;
-window.updateNewsDatabase = updateNewsDatabase;
-window.getMovieNews = getMovieNews;
-window.getGameNews = getGameNews;
-window.getBookNews = getBookNews;
-window.getPopularFilms = getPopularFilms;
-window.fetchAllNewsFromRSS = fetchAllNewsFromRSS;
 
 console.log('✅ API модуль загружен');
 console.log('📌 Кинопоиск API: ✅ настроен');
-console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен'));
-console.log('📌 Google Books API: ✅ работает без ключа');
-console.log('📌 NewsAPI: ❌ ОТКЛЮЧЕН (SSL ошибка)');
-console.log('📌 RSS новости: ✅ загружены');
-console.log('📌 Максимальное количество страниц для поиска:', MAX_PAGES);
+console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен (опционально)'));
+console.log('📌 Google Books API: ' + (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY.trim() !== '' ? '✅ настроен' : '⚠️ работает без ключа'));
