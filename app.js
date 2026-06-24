@@ -81,7 +81,7 @@ let newsDatabase = JSON.parse(localStorage.getItem('seeker_news')) || [
     { 
         id: 8, 
         category: "Игры", 
-        title: "The International 2024: рекордный призовой фонд", 
+        title: "The International 2026: рекордный призовой фонд", 
         description: "Турнир по Dota 2 соберет лучшие команды мира в Копенгагене. Призовой фонд превысил 3 миллиона долларов.", 
         date: new Date(Date.now() - 1000*60*60*10).toLocaleString(), 
         url: "https://www.dota2.com/esports/ti13/" 
