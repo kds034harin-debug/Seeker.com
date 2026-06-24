@@ -1030,6 +1030,53 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Инициализация завершена');
 });
+// ========== ОТРИСОВКА КНИГ ==========
+function renderBooks(books) {
+    if (!books || !books.length) {
+        return '';
+    }
+    
+    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">📚 Книги (' + books.length + ')</h3>';
+    
+    for (var i = 0; i < books.length; i++) {
+        var book = books[i];
+        var imageUrl = book.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+        var isFav = isFavorite(book.id, 'content');
+        var favButton = '';
+        
+        if (currentUser) {
+            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + book.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + book.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
+        }
+        
+        var ratingHtml = '';
+        if (book.rating) {
+            ratingHtml = '<span class="year-rating">⭐ ' + book.rating + ' / 5</span>';
+        }
+        
+        html += '<div class="result-card book-card" data-id="' + book.id + '" data-type="book">' +
+            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
+            '<div class="card-content">' +
+            '<div class="card-header">' +
+            '<span class="content-type" style="background:#8B4513; color:white; padding:2px 8px; border-radius:4px;">📖 КНИГА</span>' +
+            ratingHtml +
+            favButton +
+            '</div>' +
+            '<div class="title">' + escapeHtml(book.title) + '</div>' +
+            '<div class="description">' + escapeHtml((book.description || '').substring(0, 150)) + ((book.description || '').length > 150 ? '...' : '') + '</div>' +
+            '<div class="info-grid">' +
+            '<div class="info-item"><span class="info-label">Автор:</span> ' + escapeHtml(book.author || 'Не указан') + '</div>' +
+            '<div class="info-item"><span class="info-label">Год:</span> ' + (book.year || 'Не указан') + '</div>' +
+            '<div class="info-item"><span class="info-label">Страниц:</span> ' + (book.pages || '—') + '</div>' +
+            '</div>' +
+            '<div class="links-section">' +
+            '<a href="' + (book.links?.buy || '#') + '" target="_blank" class="link-btn">📖 Читать</a>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+    
+    return html;
+}
 
 // Делаем функции глобальными для доступа из HTML
 window.toggleFavorite = toggleFavorite;
