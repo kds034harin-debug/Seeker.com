@@ -9,16 +9,9 @@ const KINOPOISK_API_URL = 'https://kinopoiskapiunofficial.tech/api';
 // 2. Google Books - ВАШ КЛЮЧ
 const GOOGLE_BOOKS_API_KEY = 'AIzaSyAjhurxN3r8j4MjEzFDW6fIBXkgKDZzbOs';
 
-// 3. IGDB / Twitch (для игр)
+// 3. IGDB / Twitch (для игр) - опционально
 const IGDB_CLIENT_ID = ''; // Вставьте Client-ID
 const IGDB_ACCESS_TOKEN = ''; // Вставьте Access Token
-
-// ============================================================
-// ========== НАСТРОЙКИ ПРОИЗВОДИТЕЛЬНОСТИ ==========
-// ============================================================
-
-const MAX_PAGES = 2; // Уменьшено с 5 до 2 для скорости
-const FILMS_PER_PAGE = 10;
 
 // ============================================================
 // ========== API КИНОПОИСКА ==========
@@ -79,7 +72,7 @@ async function searchKinopoiskAPI(query) {
 }
 
 // ============================================================
-// ========== GOOGLE BOOKS API ==========
+// ========== GOOGLE BOOKS API (БЕЗ ПРОКСИ) ==========
 // ============================================================
 
 async function searchGoogleBooks(query) {
@@ -88,16 +81,28 @@ async function searchGoogleBooks(query) {
     console.log('📚 Поиск книг в Google Books:', query);
     
     try {
+        // ПРЯМОЙ ЗАПРОС (без прокси)
         var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + 
                      encodeURIComponent(query) + 
                      '&maxResults=10' + 
                      '&orderBy=relevance' +
                      '&key=' + GOOGLE_BOOKS_API_KEY;
         
+        console.log('📡 Запрос к Google Books');
+        
         var response = await fetch(apiUrl);
         
         if (!response.ok) {
             console.error('Google Books API ошибка:', response.status);
+            
+            if (response.status === 403) {
+                console.error('❌ Ошибка 403: Проверьте ключ API и настройки в Google Cloud Console.');
+                console.error('   - Убедитесь, что Books API включен');
+                console.error('   - Проверьте ограничения ключа');
+            } else if (response.status === 429) {
+                console.error('❌ Превышен лимит запросов. Подождите немного.');
+            }
+            
             return [];
         }
         
@@ -133,15 +138,17 @@ async function searchGoogleBooks(query) {
                 };
             });
         }
+        
+        console.log('❌ Книги не найдены');
         return [];
     } catch (error) {
-        console.error('❌ Ошибка Google Books:', error);
+        console.error('❌ Ошибка Google Books:', error.message);
         return [];
     }
 }
 
 // ============================================================
-// ========== API ДЛЯ ИГР (IGDB) ==========
+// ========== API ДЛЯ ИГР (IGDB) - опционально ==========
 // ============================================================
 
 async function searchIGDB(query) {
@@ -174,22 +181,17 @@ async function searchIGDB(query) {
         if (data && data.length > 0) {
             return data.map(function(game) {
                 var imageUrl = game.cover && game.cover.url ? game.cover.url.replace('//', 'https://') : 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-                var rating = game.rating ? (game.rating / 10).toFixed(1) : null;
-                var platforms = game.platforms ? game.platforms.map(function(p) { return p.name; }).join(', ') : "—";
-                var genres = game.genres ? game.genres.map(function(g) { return g.name; }).join(', ') : "—";
-                var developer = game.involved_companies && game.involved_companies[0] && game.involved_companies[0].company ? game.involved_companies[0].company.name : "—";
-                
                 return {
                     id: 'igdb_' + game.id,
                     type: "game",
                     title: game.name || 'Без названия',
                     year: game.first_release_date ? new Date(game.first_release_date * 1000).getFullYear() : null,
-                    rating: rating,
+                    rating: game.rating ? (game.rating / 10).toFixed(1) : null,
                     description: game.summary ? game.summary.substring(0, 300) : "Описание отсутствует",
                     image: imageUrl,
-                    developer: developer,
-                    platforms: platforms,
-                    genre: genres,
+                    developer: game.involved_companies?.[0]?.company?.name || "—",
+                    platforms: game.platforms?.map(function(p) { return p.name; }).join(', ') || "—",
+                    genre: game.genres?.map(function(g) { return g.name; }).join(', ') || "—",
                     source: "IGDB",
                     links: { buy: "https://www.google.com/search?q=" + encodeURIComponent(game.name || '') + "+купить" }
                 };
@@ -207,20 +209,15 @@ async function searchIGDB(query) {
 // ============================================================
 
 async function searchAllAPIs(query) {
-    console.log('🔍 Поиск:', query);
+    console.log('🔍 Универсальный поиск:', query);
     
     try {
-        // Запускаем параллельно для скорости
-        var [movies, books] = await Promise.all([
+        // Запускаем параллельно
+        var [movies, books, games] = await Promise.all([
             searchKinopoiskAPI(query),
-            searchGoogleBooks(query)
+            searchGoogleBooks(query),
+            searchIGDB(query)
         ]);
-        
-        // Игры загружаем отдельно (если есть ключи)
-        var games = [];
-        if (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN) {
-            games = await searchIGDB(query);
-        }
         
         var allResults = movies.concat(games).concat(books);
         
@@ -248,5 +245,5 @@ window.searchAllAPIs = searchAllAPIs;
 
 console.log('✅ API модуль загружен');
 console.log('📌 Кинопоиск API: ✅ настроен');
-console.log('📌 Google Books API: ✅ настроен');
+console.log('📌 Google Books API: ' + (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY.trim() !== '' ? '✅ настроен' : '❌ не настроен'));
 console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен'));
