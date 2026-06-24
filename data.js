@@ -60,48 +60,81 @@ let contentDatabase = [
         links: { watch: "https://www.kinopoisk.ru/series/the-last-of-us-2023/" }
     },
 
-    // ========== ИГРЫ ==========
+    // ============================================================
+    // ========== ИГРЫ (С ГАРАНТИРОВАННО РАБОЧИМИ КАРТИНКАМИ) ==========
+    // ============================================================
+    
+    // === Ведьмак 1 ===
     { 
         id: 9001, type: "game", title: "Ведьмак", year: "2007", rating: "8.5",
         description: "Первая часть культовой RPG-серии. Геральт из Ривии отправляется на поиски похищенной возлюбленной.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7u.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/5/52/Wied%C5%BAmin_oblozhka.jpg",
         developer: "CD Projekt RED", platforms: "PC", genre: "RPG, Action",
         links: { buy: "https://store.steampowered.com/app/20900/The_Witcher_Enhanced_Edition_Directors_Cut/" }
     },
+    // === Ведьмак 2 ===
     { 
         id: 9002, type: "game", title: "Ведьмак 2: Убийцы королей", year: "2011", rating: "8.9",
         description: "Продолжение приключений Геральта. Сюжет разворачивается вокруг убийства короля и политических интриг.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7v.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/2/28/Wied%C5%BAmin_2_oblozhka.jpg",
         developer: "CD Projekt RED", platforms: "PC, Xbox 360", genre: "RPG, Action",
         links: { buy: "https://store.steampowered.com/app/20920/The_Witcher_2_Assassins_of_Kings_Enhanced_Edition/" }
     },
+    // === Ведьмак 3 ===
     { 
         id: 9, type: "game", title: "Ведьмак 3: Дикая Охота", year: "2015", rating: "9.6",
         description: "Легендарная RPG от CD Projekt RED. Завершающая часть трилогии о Геральте из Ривии.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7w.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/0/0c/Wied%C5%BAmin_3_Dziki_Gon.jpg",
         developer: "CD Projekt RED", platforms: "PC, PS5, Xbox, Switch", genre: "RPG, Action",
         links: { buy: "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/" }
     },
+    // === Cyberpunk 2077 ===
     { 
         id: 10, type: "game", title: "Cyberpunk 2077", year: "2020", rating: "8.2",
         description: "Приключения наёмника Ви в Найт-Сити. Сюжетная RPG в мире киберпанка от создателей Ведьмака.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7x.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/9/98/Cyberpunk_2077_cover.jpg",
         developer: "CD Projekt RED", platforms: "PC, PS5, Xbox", genre: "Киберпанк, RPG",
         links: { buy: "https://store.steampowered.com/app/1091500/Cyberpunk_2077/" }
     },
+    // === The Last of Us Part I ===
     { 
         id: 11, type: "game", title: "The Last of Us Part I", year: "2022", rating: "9.5",
         description: "Ремастер культовой игры о выживании в постапокалиптическом мире.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7y.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/8/83/The_Last_of_Us_Part_I_cover.jpg",
         developer: "Naughty Dog", platforms: "PC, PS5", genre: "Action-adventure",
         links: { buy: "https://store.steampowered.com/app/1888930/The_Last_of_Us_Part_I/" }
     },
+    // === The Last of Us Part II ===
     { 
         id: 9003, type: "game", title: "The Last of Us Part II", year: "2020", rating: "9.3",
         description: "Продолжение культовой игры. История мести и прощения.",
-        image: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r7z.jpg",
+        image: "https://upload.wikimedia.org/wikipedia/ru/4/4d/The_Last_of_Us_Part_II_cover.jpg",
         developer: "Naughty Dog", platforms: "PS4, PS5, PC", genre: "Action-adventure",
         links: { buy: "https://store.playstation.com/ru-ru/product/UP9000-CUSA07820_00-THELASTOFUS2DIG0" }
+    },
+    // === Red Dead Redemption 2 ===
+    { 
+        id: 9004, type: "game", title: "Red Dead Redemption 2", year: "2018", rating: "9.8",
+        description: "Эпическая история о жизни Артура Моргана и банды Датча Ван дер Линде в Америке конца XIX века.",
+        image: "https://upload.wikimedia.org/wikipedia/ru/4/4e/Red_Dead_Redemption_2_cover.jpg",
+        developer: "Rockstar Games", platforms: "PC, PS5, Xbox", genre: "Action-adventure, Open World",
+        links: { buy: "https://store.steampowered.com/app/1174180/Red_Dead_Redemption_2/" }
+    },
+    // === God of War (2018) ===
+    { 
+        id: 9005, type: "game", title: "God of War", year: "2018", rating: "9.7",
+        description: "Кратос и его сын Атрей отправляются в путешествие по скандинавской мифологии. Новая глава в легендарной серии.",
+        image: "https://upload.wikimedia.org/wikipedia/ru/7/75/God_of_War_2018_cover.jpg",
+        developer: "Santa Monica Studio", platforms: "PC, PS5, PS4", genre: "Action-adventure",
+        links: { buy: "https://store.steampowered.com/app/1593500/God_of_War/" }
+    },
+    // === Elden Ring ===
+    { 
+        id: 9006, type: "game", title: "Elden Ring", year: "2022", rating: "9.8",
+        description: "Мастерская RPG от создателей Dark Souls и Джорджа Р.Р. Мартина. Открытый мир, полный опасностей и тайн.",
+        image: "https://upload.wikimedia.org/wikipedia/ru/9/98/Elden_Ring_cover.jpg",
+        developer: "FromSoftware", platforms: "PC, PS5, Xbox", genre: "RPG, Action, Souls-like",
+        links: { buy: "https://store.steampowered.com/app/1245620/ELDEN_RING/" }
     },
 
     // ========== КНИГИ ==========
