@@ -195,7 +195,7 @@ function saveNewsToStorage() {
     var timeSpan = document.getElementById('newsUpdateTime');
     if (timeSpan) timeSpan.innerText = 'Обновлено: ' + new Date().toLocaleString();
 }alStorage.setItem('favoriteNews', JSON.stringify(favoriteNews));
-}
+
 
 // ========== ВАЛИДАЦИЯ ПАРОЛЯ ==========
 function validatePassword(password) {
