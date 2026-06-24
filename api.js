@@ -6,12 +6,22 @@
 const KINOPOISK_API_KEY = 'd0fa7c30-6035-4f8c-907b-0e7c81738ee3';
 const KINOPOISK_API_URL = 'https://kinopoiskapiunofficial.tech/api';
 
-// 2. Google Books - ВАШ КЛЮЧ
+// 2. Google Books
 const GOOGLE_BOOKS_API_KEY = 'AIzaSyAjhurxN3r8j4MjEzFDW6fIBXkgKDZzbOs';
 
 // 3. IGDB / Twitch (для игр) - опционально
-const IGDB_CLIENT_ID = ''; // Вставьте Client-ID
-const IGDB_ACCESS_TOKEN = ''; // Вставьте Access Token
+const IGDB_CLIENT_ID = '';
+const IGDB_ACCESS_TOKEN = '';
+
+// 4. RSS - ВРЕМЕННО ОТКЛЮЧАЕМ
+const USE_RSS = false;
+
+// ============================================================
+// ========== КОНЕЦ НАСТРОЙКИ ==========
+// ============================================================
+
+const MAX_PAGES = 5;
+const FILMS_PER_PAGE = 10;
 
 // ============================================================
 // ========== API КИНОПОИСКА ==========
@@ -72,7 +82,7 @@ async function searchKinopoiskAPI(query) {
 }
 
 // ============================================================
-// ========== GOOGLE BOOKS API (БЕЗ ПРОКСИ) ==========
+// ========== GOOGLE BOOKS API ==========
 // ============================================================
 
 async function searchGoogleBooks(query) {
@@ -81,7 +91,6 @@ async function searchGoogleBooks(query) {
     console.log('📚 Поиск книг в Google Books:', query);
     
     try {
-        // ПРЯМОЙ ЗАПРОС (без прокси)
         var apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + 
                      encodeURIComponent(query) + 
                      '&maxResults=10' + 
@@ -94,15 +103,6 @@ async function searchGoogleBooks(query) {
         
         if (!response.ok) {
             console.error('Google Books API ошибка:', response.status);
-            
-            if (response.status === 403) {
-                console.error('❌ Ошибка 403: Проверьте ключ API и настройки в Google Cloud Console.');
-                console.error('   - Убедитесь, что Books API включен');
-                console.error('   - Проверьте ограничения ключа');
-            } else if (response.status === 429) {
-                console.error('❌ Превышен лимит запросов. Подождите немного.');
-            }
-            
             return [];
         }
         
@@ -189,9 +189,9 @@ async function searchIGDB(query) {
                     rating: game.rating ? (game.rating / 10).toFixed(1) : null,
                     description: game.summary ? game.summary.substring(0, 300) : "Описание отсутствует",
                     image: imageUrl,
-                    developer: game.involved_companies?.[0]?.company?.name || "—",
-                    platforms: game.platforms?.map(function(p) { return p.name; }).join(', ') || "—",
-                    genre: game.genres?.map(function(g) { return g.name; }).join(', ') || "—",
+                    developer: game.involved_companies && game.involved_companies[0] && game.involved_companies[0].company ? game.involved_companies[0].company.name : "—",
+                    platforms: game.platforms ? game.platforms.map(function(p) { return p.name; }).join(', ') : "—",
+                    genre: game.genres ? game.genres.map(function(g) { return g.name; }).join(', ') : "—",
                     source: "IGDB",
                     links: { buy: "https://www.google.com/search?q=" + encodeURIComponent(game.name || '') + "+купить" }
                 };
@@ -205,6 +205,40 @@ async function searchIGDB(query) {
 }
 
 // ============================================================
+// ========== ПОИСК ИГР В ЛОКАЛЬНОЙ БАЗЕ ==========
+// ============================================================
+
+async function searchGamesInLocalDB(query) {
+    if (!query || query.trim() === '') return [];
+    
+    var results = contentDatabase.filter(function(item) {
+        return item.type === 'game' && 
+               (item.title.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+                (item.description && item.description.toLowerCase().indexOf(query.toLowerCase()) !== -1));
+    });
+    
+    console.log('🎮 Найдено игр в локальной базе:', results.length);
+    return results;
+}
+
+// ============================================================
+// ========== RSS (ОТКЛЮЧЕН) ==========
+// ============================================================
+
+async function fetchRSSFeed(url) {
+    if (!USE_RSS) return null;
+    // ... остальной код
+}
+
+async function fetchAllNewsFromRSS() {
+    if (!USE_RSS) {
+        console.log('📰 RSS отключен');
+        return [];
+    }
+    // ... остальной код
+}
+
+// ============================================================
 // ========== УНИВЕРСАЛЬНЫЙ ПОИСК ==========
 // ============================================================
 
@@ -212,12 +246,18 @@ async function searchAllAPIs(query) {
     console.log('🔍 Универсальный поиск:', query);
     
     try {
-        // Запускаем параллельно
-        var [movies, books, games] = await Promise.all([
+        var [movies, books, games, localGames] = await Promise.all([
             searchKinopoiskAPI(query),
             searchGoogleBooks(query),
-            searchIGDB(query)
+            searchIGDB(query),
+            searchGamesInLocalDB(query)
         ]);
+        
+        // Добавляем локальные игры
+        if (localGames.length > 0) {
+            games = games.concat(localGames);
+            console.log('🎮 Игр после добавления локальных:', games.length);
+        }
         
         var allResults = movies.concat(games).concat(books);
         
@@ -233,191 +273,6 @@ async function searchAllAPIs(query) {
         return [];
     }
 }
-// ========== OPEN LIBRARY API (ДЛЯ КАРТИНОК) ==========
-async function getBookCoverFromOpenLibrary(title, author) {
-    try {
-        var query = encodeURIComponent(title);
-        if (author) {
-            query += '+' + encodeURIComponent(author);
-        }
-        
-        var url = 'https://openlibrary.org/search.json?q=' + query + '&limit=1';
-        var response = await fetch(url);
-        var data = await response.json();
-        
-        if (data && data.docs && data.docs.length > 0) {
-            var coverId = data.docs[0].cover_i;
-            if (coverId) {
-                return {
-                    url: 'https://covers.openlibrary.org/b/id/' + coverId + '-L.jpg',
-                    id: coverId
-                };
-            }
-        }
-        return null;
-    } catch (error) {
-        console.error('Ошибка Open Library:', error);
-        return null;
-    }
-}
-
-// Функция для обновления картинок в локальной базе
-async function updateLocalBookCovers() {
-    console.log('🔄 Обновление обложек книг...');
-    var updated = 0;
-    
-    for (var i = 0; i < contentDatabase.length; i++) {
-        var book = contentDatabase[i];
-        if (book.type !== 'book') continue;
-        
-        // Пропускаем если уже есть нормальная картинка
-        if (book.image && !book.image.includes('placeholder') && !book.image.includes('No+Image')) {
-            continue;
-        }
-        
-        try {
-            var cover = await getBookCoverFromOpenLibrary(book.title, book.author);
-            if (cover && cover.url) {
-                book.image = cover.url;
-                updated++;
-                console.log('✅ Обновлена обложка для:', book.title);
-            }
-        } catch (error) {
-            console.error('Ошибка обновления:', error);
-        }
-        
-        // Задержка между запросами
-        await new Promise(function(resolve) { setTimeout(resolve, 300); });
-    }
-    
-    console.log('✅ Обновлено обложек:', updated);
-    return updated;
-}
-// ============================================================
-// ========== НОВОСТИ ИЗ RSS ==========
-// ============================================================
-
-async function fetchRSSFeed(url) {
-    try {
-        const proxyUrl = 'https://api.allorigins.win/raw?url=';
-        const response = await fetch(proxyUrl + encodeURIComponent(url));
-        
-        if (!response.ok) {
-            console.error('Ошибка загрузки RSS:', response.status);
-            return null;
-        }
-        
-        const text = await response.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'text/xml');
-        
-        const items = xml.querySelectorAll('item');
-        const news = [];
-        
-        items.forEach(function(item) {
-            const title = item.querySelector('title')?.textContent || '';
-            const description = item.querySelector('description')?.textContent || '';
-            const link = item.querySelector('link')?.textContent || '';
-            const pubDate = item.querySelector('pubDate')?.textContent || '';
-            const category = item.querySelector('category')?.textContent || '';
-            
-            const cleanDescription = description.replace(/<[^>]*>/g, '').trim();
-            
-            if (title) {
-                news.push({
-                    title: title.trim(),
-                    description: cleanDescription.substring(0, 300) || 'Описание отсутствует',
-                    url: link || '#',
-                    date: pubDate ? new Date(pubDate).toLocaleString() : new Date().toLocaleString(),
-                    category: category || 'Новости'
-                });
-            }
-        });
-        
-        return news;
-    } catch (error) {
-        console.error('Ошибка парсинга RSS:', error);
-        return null;
-    }
-}
-
-async function fetchAllNewsFromRSS() {
-    console.log('📰 Загрузка новостей из RSS...');
-    const allNews = [];
-    
-    try {
-        const sources = [
-            'https://www.kinopoisk.ru/news/rss/',
-            'https://www.film.ru/rss/news',
-            'https://www.ign.com/rss/articles',
-            'https://www.litres.ru/static/rss/news.xml',
-            'https://www.rbc.ru/rss/culture/',
-            'https://www.kommersant.ru/RSS/news-culture.xml'
-        ];
-        
-        const promises = sources.map(function(source) {
-            return fetchRSSFeed(source);
-        });
-        
-        const results = await Promise.all(promises);
-        
-        results.forEach(function(newsList) {
-            if (newsList && newsList.length > 0) {
-                allNews.push.apply(allNews, newsList);
-            }
-        });
-        
-        // Удаляем дубликаты по заголовку
-        const uniqueNews = [];
-        const titles = {};
-        
-        allNews.forEach(function(news) {
-            if (!titles[news.title]) {
-                titles[news.title] = true;
-                uniqueNews.push(news);
-            }
-        });
-        
-        // Сортируем по дате (сначала свежие)
-        uniqueNews.sort(function(a, b) {
-            var dateA = new Date(a.date);
-            var dateB = new Date(b.date);
-            return dateB - dateA;
-        });
-        
-        console.log('✅ Загружено новостей из RSS:', uniqueNews.length);
-        return uniqueNews.slice(0, 30);
-    } catch (error) {
-        console.error('Ошибка загрузки RSS новостей:', error);
-        return [];
-    }
-}
-
-// ========== ОБНОВЛЕНИЕ НОВОСТЕЙ ==========
-async function updateNewsDatabase() {
-    console.log('🔄 Обновление новостей...');
-    
-    try {
-        const news = await fetchAllNewsFromRSS();
-        
-        if (news && news.length > 0) {
-            localStorage.setItem('seeker_news', JSON.stringify(news));
-            console.log('✅ Новости обновлены, добавлено:', news.length);
-            return news;
-        }
-        return [];
-    } catch (error) {
-        console.error('Ошибка обновления новостей:', error);
-        return [];
-    }
-}
-
-// Экспорт
-window.fetchAllNewsFromRSS = fetchAllNewsFromRSS;
-window.updateNewsDatabase = updateNewsDatabase;
-// Экспорт
-window.getBookCoverFromOpenLibrary = getBookCoverFromOpenLibrary;
-window.updateLocalBookCovers = updateLocalBookCovers;
 
 // ============================================================
 // ========== ЭКСПОРТ ==========
@@ -427,8 +282,10 @@ window.searchKinopoiskAPI = searchKinopoiskAPI;
 window.searchGoogleBooks = searchGoogleBooks;
 window.searchIGDB = searchIGDB;
 window.searchAllAPIs = searchAllAPIs;
+window.searchGamesInLocalDB = searchGamesInLocalDB;
 
 console.log('✅ API модуль загружен');
 console.log('📌 Кинопоиск API: ✅ настроен');
 console.log('📌 Google Books API: ' + (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY.trim() !== '' ? '✅ настроен' : '❌ не настроен'));
 console.log('📌 IGDB API: ' + (IGDB_CLIENT_ID && IGDB_ACCESS_TOKEN ? '✅ настроен' : '❌ не настроен'));
+console.log('📌 RSS: ❌ ОТКЛЮЧЕН');
