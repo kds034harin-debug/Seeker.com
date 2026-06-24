@@ -36,18 +36,11 @@ let contentDatabase = [
         director: "Грета Гервиг", cast: "Марго Робби, Райан Гослинг", duration: "114 мин",
         links: { watch: "https://www.kinopoisk.ru/film/barbie/" }
     },
-    { 
-        id: 16, type: "movie", title: "Ведьмак: Кошмар волка", year: "2021", rating: "7.4",
-        description: "Анимационный фильм-приквел к сериалу 'Ведьмак'.",
-        image: "https://image.tmdb.org/t/p/w500/7vjaCdMw15BcXhrLhIErge1TFqd.jpg",
-        director: "Кванг Ил Хан", cast: "Тео Джеймс, Лара Пулвер", duration: "83 мин",
-        links: { watch: "https://www.netflix.com/title/81435651" }
-    },
 
     // ========== СЕРИАЛЫ ==========
     { 
         id: 6, type: "series", title: "Ведьмак (Netflix)", year: "2019-2023", rating: "8.0",
-        description: "Генри Кавилл в роли Геральта из Ривии.",
+        description: "Генри Кавилл в роли Геральта из Ривии. Экранизация культовой серии книг и игр.",
         image: "https://image.tmdb.org/t/p/w500/7vjaCdMw15BcXhrLhIErge1TFqd.jpg",
         creator: "Лорен Шмидт-Хиссрих", seasons: "3 сезона", episodes: "24 эпизода",
         links: { watch: "https://www.netflix.com/title/80189685" }
@@ -68,54 +61,81 @@ let contentDatabase = [
     },
 
     // ========== ИГРЫ ==========
+    // === Ведьмак 1 ===
+    { 
+        id: 9001, type: "game", title: "Ведьмак", year: "2007", rating: "8.5",
+        description: "Первая часть культовой RPG-серии. Геральт из Ривии отправляется на поиски похищенной возлюбленной. Игра положила начало знаменитой трилогии.",
+        image: "https://image.tmdb.org/t/p/w500/4w3r7VYvDTZ1Ii6oZjJ2yXn6Uc2.jpg",
+        developer: "CD Projekt RED", platforms: "PC", genre: "RPG, Action",
+        links: { buy: "https://store.steampowered.com/app/20900/The_Witcher_Enhanced_Edition_Directors_Cut/" }
+    },
+    // === Ведьмак 2 ===
+    { 
+        id: 9002, type: "game", title: "Ведьмак 2: Убийцы королей", year: "2011", rating: "8.9",
+        description: "Продолжение приключений Геральта. Сюжет разворачивается вокруг убийства короля и политических интриг. Улучшенная графика и более глубокий сюжет.",
+        image: "https://image.tmdb.org/t/p/w500/k8Wc6YbWeFCrX8F2I3lFLZY2Cgx.jpg",
+        developer: "CD Projekt RED", platforms: "PC, Xbox 360", genre: "RPG, Action",
+        links: { buy: "https://store.steampowered.com/app/20920/The_Witcher_2_Assassins_of_Kings_Enhanced_Edition/" }
+    },
+    // === Ведьмак 3 ===
     { 
         id: 9, type: "game", title: "Ведьмак 3: Дикая Охота", year: "2015", rating: "9.6",
-        description: "Легендарная RPG от CD Projekt RED.",
+        description: "Легендарная RPG от CD Projekt RED. Завершающая часть трилогии о Геральте из Ривии. Открытый мир, захватывающий сюжет и множество побочных заданий.",
         image: "https://image.tmdb.org/t/p/w500/kDp1v12nJCLVc1y8tUf3PvC5XKb.jpg",
-        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox, Switch", genre: "RPG",
-        links: { buy: "https://store.steampowered.com/app/292030/" }
+        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox, Switch", genre: "RPG, Action",
+        links: { buy: "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/" }
     },
+    // === Cyberpunk 2077 ===
     { 
         id: 10, type: "game", title: "Cyberpunk 2077", year: "2020", rating: "8.2",
-        description: "Приключения наёмника Ви в Найт-Сити.",
+        description: "Приключения наёмника Ви в Найт-Сити. Сюжетная RPG в мире киберпанка от создателей Ведьмака. Город будущего, полный опасностей и возможностей.",
         image: "https://image.tmdb.org/t/p/w500/9QusWjfnYxX7q0fAxfM63apLr2P.jpg",
-        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox", genre: "Киберпанк",
-        links: { buy: "https://store.steampowered.com/app/1091500/" }
+        developer: "CD Projekt RED", platforms: "PC, PS5, Xbox", genre: "Киберпанк, RPG",
+        links: { buy: "https://store.steampowered.com/app/1091500/Cyberpunk_2077/" }
     },
+    // === The Last of Us Part I ===
     { 
         id: 11, type: "game", title: "The Last of Us Part I", year: "2022", rating: "9.5",
-        description: "Ремастер культовой игры о выживании в постапокалиптическом мире.",
+        description: "Ремастер культовой игры о выживании в постапокалиптическом мире. Джоэл и Элли отправляются в опасное путешествие через разрушенную Америку.",
         image: "https://image.api.playstation.com/vulcan/ap/rnd/202206/0221/efP7VK7p8QhMq7J8XJ3wK3R4.png",
-        developer: "Naughty Dog", platforms: "PC, PS5", genre: "Action-adventure",
-        links: { buy: "https://store.steampowered.com/app/1888930/" }
+        developer: "Naughty Dog", platforms: "PC, PS5", genre: "Action-adventure, Survival",
+        links: { buy: "https://store.steampowered.com/app/1888930/The_Last_of_Us_Part_I/" }
+    },
+    // === The Last of Us Part II ===
+    { 
+        id: 9003, type: "game", title: "The Last of Us Part II", year: "2020", rating: "9.3",
+        description: "Продолжение культовой игры. История мести и прощения. Элли отправляется в опасное путешествие, чтобы отомстить за убийство близкого человека.",
+        image: "https://image.api.playstation.com/vulcan/ap/rnd/202206/0221/efP7VK7p8QhMq7J8XJ3wK3R4.png",
+        developer: "Naughty Dog", platforms: "PS4, PS5, PC", genre: "Action-adventure, Survival",
+        links: { buy: "https://store.playstation.com/ru-ru/product/UP9000-CUSA07820_00-THELASTOFUS2DIG0" }
     },
 
     // ========== КНИГИ ==========
     { 
         id: 12, type: "book", title: "Ведьмак. Последнее желание", year: "1993", rating: "8.9",
-        description: "Первый сборник рассказов Анджея Сапковского.",
-        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Wiedźmin",
+        description: "Первый сборник рассказов Анджея Сапковского о ведьмаке Геральте из Ривии.",
+        image: "https://covers.openlibrary.org/b/id/8221506-L.jpg",
         author: "Анджей Сапковский", pages: "288",
         links: { buy: "https://www.litres.ru/andzhey-sapkovskiy/poslednee-zhelanie/" }
     },
     { 
         id: 13, type: "book", title: "Дюна", year: "1965", rating: "9.2",
-        description: "Шедевр научной фантастики Фрэнка Герберта.",
-        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Dune",
+        description: "Шедевр научной фантастики Фрэнка Герберта о пустынной планете Арракис.",
+        image: "https://covers.openlibrary.org/b/id/10781358-L.jpg",
         author: "Фрэнк Герберт", pages: "412",
         links: { buy: "https://www.litres.ru/frenk-gerbert/duna/" }
     },
     { 
         id: 14, type: "book", title: "1984", year: "1949", rating: "9.0",
-        description: "Классический роман-антиутопия Джорджа Оруэлла.",
-        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=1984",
+        description: "Классический роман-антиутопия Джорджа Оруэлла о тоталитарном обществе.",
+        image: "https://covers.openlibrary.org/b/id/10781359-L.jpg",
         author: "Джордж Оруэлл", pages: "328",
         links: { buy: "https://www.litres.ru/dzhordzh-oruell/1984/" }
     },
     { 
         id: 15, type: "book", title: "Гарри Поттер и философский камень", year: "1997", rating: "9.0",
-        description: "Начало магической саги о мальчике-волшебнике.",
-        image: "https://via.placeholder.com/90x130/f0f0f0/aaa?text=Harry+Potter",
+        description: "Начало магической саги о мальчике-волшебнике Гарри Поттере.",
+        image: "https://covers.openlibrary.org/b/id/8221507-L.jpg",
         author: "Джоан Роулинг", pages: "332",
         links: { buy: "https://www.litres.ru/dzhoan-rouling/garri-potter-i-filosofskiy-kamen/" }
     }
