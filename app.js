@@ -19,162 +19,142 @@ let newsModal = null;
 // ========== НОВОСТИ ==========
 let newsDatabase = JSON.parse(localStorage.getItem('seeker_news')) || [
     { 
-        id: 1, 
-        category: "Фильмы", 
+        id: 1, category: "🎬 Фильмы", 
         title: "Дюна 2 собрала 700 миллионов долларов в прокате", 
-        description: "Продолжение эпической саги Дени Вильнёва продолжает бить рекорды. Картина уже стала самой кассовой в 2024 году.",
-        date: new Date(Date.now() - 1000*60*60*2).toLocaleString(), 
+        description: "Продолжение эпической саги Дени Вильнёва продолжает бить рекорды.", 
+        date: new Date().toLocaleString(), 
         url: "https://www.kinopoisk.ru/film/dyuna-chast-vtoraya-2024/" 
     },
     { 
-        id: 2, 
-        category: "Сериалы", 
+        id: 2, category: "📺 Сериалы", 
         title: "Новый сериал по Гарри Поттеру: первые детали", 
-        description: "HBO раскрыл планы на 7 сезонов с новым актерским составом. Создатели обещают максимальную близость к книгам.",
+        description: "HBO раскрыл планы на 7 сезонов с новым актерским составом.", 
         date: new Date(Date.now() - 1000*60*60*5).toLocaleString(), 
         url: "https://www.hbo.com/harry-potter" 
     },
     { 
-        id: 3, 
-        category: "Фильмы", 
+        id: 3, category: "🎬 Фильмы", 
         title: "Дэдпул 3: первые отзывы критиков", 
-        description: "Критики в восторге от триквела с Райаном Рейнольдсом и Хью Джекманом. Фильм стал самым успешным в серии.",
+        description: "Критики в восторге от триквела с Райаном Рейнольдсом.", 
         date: new Date(Date.now() - 1000*60*60*8).toLocaleString(), 
         url: "https://www.marvel.com/movies/deadpool-3" 
     },
     { 
-        id: 4, 
-        category: "Сериалы", 
+        id: 4, category: "📺 Сериалы", 
         title: "The Last of Us 2 сезон: дата выхода и подробности", 
-        description: "HBO Max раскрыл первые кадры второго сезона. Премьера ожидается весной 2025 года.",
+        description: "HBO Max раскрыл первые кадры второго сезона.", 
         date: new Date(Date.now() - 1000*60*60*12).toLocaleString(), 
         url: "https://www.hbo.com/the-last-of-us" 
     },
     { 
-        id: 5, 
-        category: "Фильмы", 
+        id: 5, category: "🎬 Фильмы", 
         title: "Дьявол носит Prada 2 официально анонсирован", 
-        description: "Мерил Стрип и Энн Хэтэуэй могут вернуться к своим ролям. Съемки начнутся в 2025 году.",
+        description: "Мерил Стрип и Энн Хэтэуэй могут вернуться к своим ролям.", 
         date: new Date(Date.now() - 1000*60*60*24).toLocaleString(), 
         url: "https://www.kinopoisk.ru/film/devil-wears-prada-2/" 
     },
     { 
-        id: 6, 
-        category: "Игры", 
+        id: 6, category: "🎮 Игры", 
         title: "Новый трейлер GTA 6 набрал 100 млн просмотров за сутки", 
-        description: "Рекордный трейлер долгожданной игры побил все ожидания. Релиз запланирован на 2025 год.",
+        description: "Рекордный трейлер долгожданной игры побил все ожидания.", 
         date: new Date(Date.now() - 1000*60*60*3).toLocaleString(), 
         url: "https://www.rockstargames.com/gta-vi" 
     },
     { 
-        id: 7, 
-        category: "Игры", 
+        id: 7, category: "🎮 Игры", 
         title: "CD Projekt RED анонсировала новую игру во вселенной Ведьмака", 
-        description: "Студия подтвердила разработку следующей части саги на Unreal Engine 5. Проект находится на ранней стадии.",
+        description: "Студия подтвердила разработку следующей части саги на Unreal Engine 5.", 
         date: new Date(Date.now() - 1000*60*60*6).toLocaleString(), 
         url: "https://www.thewitcher.com/ru/" 
     },
     { 
-        id: 8, 
-        category: "Игры", 
+        id: 8, category: "🎮 Игры", 
         title: "The International 2024: рекордный призовой фонд", 
-        description: "Турнир по Dota 2 соберет лучшие команды мира в Копенгагене. Призовой фонд превысил 3 миллиона долларов.",
+        description: "Турнир по Dota 2 соберет лучшие команды мира в Копенгагене.", 
         date: new Date(Date.now() - 1000*60*60*10).toLocaleString(), 
         url: "https://www.dota2.com/esports/ti13/" 
     },
     { 
-        id: 9, 
-        category: "Игры", 
+        id: 9, category: "🎮 Игры", 
         title: "Fallout продлён на 2 сезон", 
-        description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры. Съемки второго сезона начнутся в 2025 году.",
+        description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры.", 
         date: new Date(Date.now() - 1000*60*60*18).toLocaleString(), 
         url: "https://www.amazon.com/Fallout" 
     },
     { 
-        id: 10, 
-        category: "Игры", 
+        id: 10, category: "🎮 Игры", 
         title: "Valorant: вышел патч 8.11 с новым агентом", 
-        description: "Riot Games представила сбалансированные изменения и свежего стража. Новый агент получил способности, связанные с временным контролем.",
+        description: "Riot Games представила сбалансированные изменения и свежего стража.", 
         date: new Date(Date.now() - 1000*60*60*30).toLocaleString(), 
         url: "https://playvalorant.com/ru-ru/news/" 
     },
     { 
-        id: 11, 
-        category: "Книги", 
+        id: 11, category: "📚 Книги", 
         title: "Новая книга о Гарри Поттере выйдет в 2025", 
-        description: "Джоан Роулинг работает над расширением магической вселенной. Детали пока держатся в секрете.",
+        description: "Джоан Роулинг работает над расширением магической вселенной.", 
         date: new Date(Date.now() - 1000*60*60*20).toLocaleString(), 
         url: "https://www.bloomsbury.com/uk/discover/harry-potter/" 
     },
     { 
-        id: 12, 
-        category: "Книги", 
+        id: 12, category: "📚 Книги", 
         title: "Новая книга Стивена Кинга стала бестселлером", 
-        description: "Роман 'Институт' возглавил списки продаж в России и США. Критики называют его лучшей книгой года.",
+        description: "Роман 'Институт' возглавил списки продаж в России и США.", 
         date: new Date(Date.now() - 1000*60*60*28).toLocaleString(), 
         url: "https://www.litres.ru/author/stiven-king/" 
     },
     { 
-        id: 13, 
-        category: "Книги", 
+        id: 13, category: "📚 Книги", 
         title: "Лауреаты премии Букер 2024 объявлены", 
-        description: "Престижную литературную премию получила книга 'Западный край' о жизни в постапокалиптическом мире.",
+        description: "Престижную литературную премию получила книга 'Западный край'.", 
         date: new Date(Date.now() - 1000*60*60*36).toLocaleString(), 
         url: "https://thebookerprizes.com/" 
     },
     { 
-        id: 14, 
-        category: "Технологии", 
+        id: 14, category: "💻 Технологии", 
         title: "Apple представила Vision Pro: новый стандарт AR/VR", 
-        description: "Компания Apple представила свои первые очки дополненной реальности. Устройство совмещает виртуальную и реальную среду.",
+        description: "Компания Apple представила свои первые очки дополненной реальности.", 
         date: new Date(Date.now() - 1000*60*60*40).toLocaleString(), 
         url: "https://www.apple.com/apple-vision-pro/" 
     },
     { 
-        id: 15, 
-        category: "Технологии", 
+        id: 15, category: "💻 Технологии", 
         title: "NVIDIA представила новое поколение видеокарт RTX 50", 
-        description: "Новые видеокарты GeForce RTX 50 серии обещают значительный скачок производительности в играх и для ИИ-вычислений.",
+        description: "Новые видеокарты GeForce RTX 50 серии обещают значительный скачок производительности.", 
         date: new Date(Date.now() - 1000*60*60*48).toLocaleString(), 
         url: "https://www.nvidia.com/ru-ru/geforce/graphics-cards/" 
     },
     { 
-        id: 16, 
-        category: "Культура", 
+        id: 16, category: "🎭 Культура", 
         title: "В Москве прошла выставка современного искусства", 
-        description: "На выставке были представлены работы более 50 художников из 20 стран. Мероприятие посетило 10 000 человек.",
+        description: "На выставке были представлены работы более 50 художников из 20 стран.", 
         date: new Date(Date.now() - 1000*60*60*56).toLocaleString(), 
         url: "https://www.culture.ru/" 
     },
     { 
-        id: 17, 
-        category: "Культура", 
+        id: 17, category: "🎭 Культура", 
         title: "Новый альбом группы Radiohead стал платиновым", 
-        description: "Долгожданный альбом британской рок-группы получил статус платинового за первую неделю после выхода.",
+        description: "Долгожданный альбом британской рок-группы получил статус платинового.", 
         date: new Date(Date.now() - 1000*60*60*72).toLocaleString(), 
         url: "https://www.radiohead.com/" 
     },
     { 
-        id: 18, 
-        category: "Игры", 
+        id: 18, category: "🎮 Игры", 
         title: "Call of Duty возвращается во Вьетнам", 
-        description: "Activision анонсировала новую часть легендарной франшизы. События игры будут происходить во времена Вьетнамской войны.",
+        description: "Activision анонсировала новую часть легендарной франшизы.", 
         date: new Date(Date.now() - 1000*60*60*80).toLocaleString(), 
         url: "https://www.callofduty.com/ru/" 
     },
     { 
-        id: 19, 
-        category: "Фильмы", 
+        id: 19, category: "🎬 Фильмы", 
         title: "Новый фильм Кристофера Нолана выйдет в 2026 году", 
-        description: "Режиссер 'Интерстеллара' и 'Оппенгеймера' готовит новый научно-фантастический проект. Подробности держатся в секрете.",
+        description: "Режиссер 'Интерстеллара' и 'Оппенгеймера' готовит новый проект.", 
         date: new Date(Date.now() - 1000*60*60*96).toLocaleString(), 
         url: "https://www.kinopoisk.ru/name/111543/" 
     },
     { 
-        id: 20, 
-        category: "Книги", 
+        id: 20, category: "📚 Книги", 
         title: "Роман 'Дюна' возвращается в список бестселлеров", 
-        description: "После выхода фильма 'Дюна: Часть вторая' книга Фрэнка Герберта снова стала бестселлером по всему миру.",
+        description: "После выхода фильма 'Дюна: Часть вторая' книга снова стала бестселлером.", 
         date: new Date(Date.now() - 1000*60*60*120).toLocaleString(), 
         url: "https://www.litres.ru/frenk-gerbert/duna/" 
     }
@@ -773,29 +753,24 @@ async function performSearch() {
         
         var html = '';
         
-        // Отображаем фильмы
         if (movies.length > 0) {
             html += renderMovies(movies);
         }
         
-        // Отображаем игры
         if (games.length > 0) {
             html += renderGames(games);
         }
         
-        // Отображаем книги
         if (books.length > 0) {
             html += renderBooks(books);
         }
         
-        // Отображаем новости
         if (filteredNews.length > 0) {
             html += renderNewsResults(filteredNews);
         }
         
         resultsContainerElem.innerHTML = html;
         
-        // Добавляем обработчики для кнопок избранного
         var favBtns = document.querySelectorAll('.favorite-star-btn');
         for (var i = 0; i < favBtns.length; i++) {
             (function(btn) {
@@ -806,7 +781,6 @@ async function performSearch() {
             })(favBtns[i]);
         }
         
-        // Добавляем обработчики для карточек
         var cards = document.querySelectorAll('.result-card');
         for (var j = 0; j < cards.length; j++) {
             (function(card) {
@@ -1197,61 +1171,46 @@ async function updateAllNews() {
     
     showToast('🔄 Обновление новостей...');
     
-    try {
-        if (typeof fetchAllNewsFromRSS === 'function') {
-            var freshNews = await fetchAllNewsFromRSS();
-            
-            if (freshNews && freshNews.length > 0) {
-                localStorage.setItem('seeker_news', JSON.stringify(freshNews));
-                newsDatabase = freshNews;
-                renderNews();
-                showToast('✅ Загружено ' + freshNews.length + ' новостей!');
-            } else {
-                showToast('⚠️ Новости не загружены');
-            }
-        } else {
-            // Демо-новости если RSS не работает
-            var demoNews = [
-                { category: "Игры", title: "Новый трейлер GTA 6 набрал 100 млн просмотров", description: "Рекордный трейлер долгожданной игры побил все ожидания.", date: new Date().toLocaleString(), url: "https://www.rockstargames.com/gta-vi" },
-                { category: "Фильмы", title: "Дэдпул 3: первые отзывы критиков", description: "Критики в восторге от триквела с Райаном Рейнольдсом.", date: new Date().toLocaleString(), url: "https://www.marvel.com/movies/deadpool-3" },
-                { category: "Сериалы", title: "Fallout продлён на 2 сезон", description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры.", date: new Date().toLocaleString(), url: "https://www.amazon.com/Fallout" }
-            ];
-            
-            var added = 0;
-            for (var i = 0; i < demoNews.length; i++) {
-                var news = demoNews[i];
-                var exists = false;
-                for (var j = 0; j < newsDatabase.length; j++) {
-                    if (newsDatabase[j].title === news.title) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    newsDatabase.unshift({
-                        id: Date.now() + added,
-                        category: news.category,
-                        title: news.title,
-                        description: news.description,
-                        date: new Date().toLocaleString(),
-                        url: news.url
-                    });
-                    added++;
-                }
-            }
-            
-            if (added > 0) {
-                if (newsDatabase.length > 30) newsDatabase = newsDatabase.slice(0, 30);
-                saveNewsToStorage();
-                renderNews();
-                showToast('✅ Добавлено ' + added + ' новых новостей!');
-            } else {
-                showToast("Новости актуальны!");
+    // Используем только демо-новости (RSS отключен)
+    var demoNews = [
+        { category: "🎮 Игры", title: "Новый трейлер GTA 6 набрал 100 млн просмотров", description: "Рекордный трейлер долгожданной игры побил все ожидания.", date: new Date().toLocaleString(), url: "https://www.rockstargames.com/gta-vi" },
+        { category: "🎬 Фильмы", title: "Дэдпул 3: первые отзывы критиков", description: "Критики в восторге от триквела с Райаном Рейнольдсом.", date: new Date().toLocaleString(), url: "https://www.marvel.com/movies/deadpool-3" },
+        { category: "📺 Сериалы", title: "Fallout продлён на 2 сезон", description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры.", date: new Date().toLocaleString(), url: "https://www.amazon.com/Fallout" },
+        { category: "🎮 Игры", title: "CD Projekt RED анонсировала новую игру во вселенной Ведьмака", description: "Студия подтвердила разработку следующей части саги на Unreal Engine 5.", date: new Date().toLocaleString(), url: "https://www.thewitcher.com/ru/" },
+        { category: "🎬 Фильмы", title: "Дюна 2 собрала 700 миллионов долларов в прокате", description: "Продолжение эпической саги Дени Вильнёва продолжает бить рекорды.", date: new Date().toLocaleString(), url: "https://www.kinopoisk.ru/film/dyuna-chast-vtoraya-2024/" },
+        { category: "📚 Книги", title: "Новая книга о Гарри Поттере выйдет в 2025", description: "Джоан Роулинг работает над расширением магической вселенной.", date: new Date().toLocaleString(), url: "https://www.bloomsbury.com/uk/discover/harry-potter/" }
+    ];
+    
+    var added = 0;
+    for (var i = 0; i < demoNews.length; i++) {
+        var news = demoNews[i];
+        var exists = false;
+        for (var j = 0; j < newsDatabase.length; j++) {
+            if (newsDatabase[j].title === news.title) {
+                exists = true;
+                break;
             }
         }
-    } catch (error) {
-        console.error('Ошибка обновления:', error);
-        showToast('❌ Ошибка загрузки новостей');
+        if (!exists) {
+            newsDatabase.unshift({
+                id: Date.now() + added,
+                category: news.category,
+                title: news.title,
+                description: news.description,
+                date: new Date().toLocaleString(),
+                url: news.url
+            });
+            added++;
+        }
+    }
+    
+    if (added > 0) {
+        if (newsDatabase.length > 30) newsDatabase = newsDatabase.slice(0, 30);
+        saveNewsToStorage();
+        renderNews();
+        showToast('✅ Добавлено ' + added + ' новостей!');
+    } else {
+        showToast("Новости актуальны!");
     }
     
     if (refreshBtn) {
