@@ -1036,49 +1036,34 @@ function navigateTo(page) {
 }
 
 // ========== АВТООБНОВЛЕНИЕ НОВОСТЕЙ ==========
-function updateAllNews() {
+// ========== АВТООБНОВЛЕНИЕ НОВОСТЕЙ ==========
+// ✅ ВСТАВИТЬ ЭТОТ КОД
+async function updateAllNews() {
     var refreshBtn = document.getElementById('refreshNewsBtn');
     if (refreshBtn) {
-        refreshBtn.innerHTML = 'Загрузка...';
+        refreshBtn.innerHTML = '⏳ Загрузка...';
         refreshBtn.disabled = true;
     }
     
-    var demoNews = [
-        { category: "Игры", title: "Новый трейлер GTA 6 набрал 100 млн просмотров за сутки", description: "Рекордный трейлер долгожданной игры побил все ожидания.", url: "https://www.rockstargames.com/gta-vi" },
-        { category: "Фильмы", title: "Дэдпул 3: первые отзывы критиков", description: "Критики в восторге от триквела с Райаном Рейнольдсом и Хью Джекманом.", url: "https://www.marvel.com/movies/deadpool-3" },
-        { category: "Сериалы", title: "Fallout продлён на 2 сезон", description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры.", url: "https://www.amazon.com/Fallout" }
-    ];
+    showToast('🔄 Обновление новостей...');
     
-    var added = 0;
-    for (var af = 0; af < demoNews.length; af++) {
-        var news = demoNews[af];
-        var exists = false;
-        for (var ag = 0; ag < newsDatabase.length; ag++) {
-            if (newsDatabase[ag].title === news.title) {
-                exists = true;
-                break;
+    try {
+        // Используем RSS
+        if (typeof fetchAllNewsFromRSS === 'function') {
+            var freshNews = await fetchAllNewsFromRSS();
+            
+            if (freshNews && freshNews.length > 0) {
+                localStorage.setItem('seeker_news', JSON.stringify(freshNews));
+                newsDatabase = freshNews;
+                renderNews();
+                showToast('✅ Загружено ' + freshNews.length + ' новостей!');
+            } else {
+                showToast('⚠️ Новости не загружены');
             }
         }
-        if (!exists) {
-            newsDatabase.unshift({
-                id: Date.now() + added,
-                category: news.category,
-                title: news.title,
-                description: news.description,
-                date: new Date().toLocaleString(),
-                url: news.url
-            });
-            added++;
-        }
-    }
-    
-    if (added > 0) {
-        if (newsDatabase.length > 30) newsDatabase = newsDatabase.slice(0, 30);
-        saveNewsToStorage();
-        renderNews();
-        showToast('✅ Добавлено ' + added + ' новых новостей!');
-    } else {
-        showToast("Новости актуальны!");
+    } catch (error) {
+        console.error('Ошибка обновления:', error);
+        showToast('❌ Ошибка загрузки новостей');
     }
     
     if (refreshBtn) {
