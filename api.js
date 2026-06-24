@@ -533,6 +533,228 @@ async function getPopularFilms(page) {
         return [];
     }
 }
+// ========== API ДЛЯ КНИГ (Google Books) ==========
+// ВСТАВИТЬ ЭТОТ КОД В КОНЕЦ api.js, ПЕРЕД console.log
+
+// 1. НАСТРОЙКА КЛЮЧА GOOGLE BOOKS
+// Вставьте ваш ключ из Google Cloud Console
+const GOOGLE_BOOKS_API_KEY = 'ВАШ_КЛЮЧ_СЮДА'; // ← Замените на реальный ключ
+
+// 2. ОСНОВНАЯ ФУНКЦИЯ ПОИСКА КНИГ
+async function searchGoogleBooks(query) {
+    if (!query || query.trim() === '') return [];
+    
+    console.log('📚 Поиск книг в Google Books:', query);
+    
+    try {
+        // Формируем URL с API ключом
+        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=' + 
+                     encodeURIComponent(query) + 
+                     '&maxResults=15' + 
+                     '&orderBy=relevance';
+        
+        // Добавляем ключ, если он есть
+        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
+            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
+        }
+        
+        console.log('📡 Запрос к Google Books:', apiUrl);
+        
+        // Используем прокси для обхода CORS
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        
+        if (!response.ok) {
+            console.error('Google Books API ошибка:', response.status);
+            return [];
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.items && data.items.length > 0) {
+            console.log('✅ Найдено книг:', data.items.length);
+            
+            return data.items.map(function(book) {
+                var volume = book.volumeInfo || {};
+                var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
+                
+                // Получаем картинку (обложку)
+                var imageUrl = 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+                if (volume.imageLinks) {
+                    imageUrl = volume.imageLinks.thumbnail || 
+                               volume.imageLinks.smallThumbnail || 
+                               imageUrl;
+                    // Меняем http на https
+                    imageUrl = imageUrl.replace('http://', 'https://');
+                }
+                
+                var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
+                var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
+                var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
+                var ratingsCount = volume.ratingsCount || 0;
+                
+                return {
+                    id: 'book_' + book.id,
+                    type: "book",
+                    title: volume.title || 'Без названия',
+                    year: publishedYear,
+                    rating: rating,
+                    description: description.substring(0, 350),
+                    image: imageUrl,
+                    author: authors,
+                    pages: volume.pageCount || "—",
+                    source: "Google Books",
+                    links: { 
+                        buy: volume.infoLink || '#' 
+                    }
+                };
+            });
+        }
+        console.log('❌ Книги не найдены');
+        return [];
+    } catch (error) {
+        console.error('❌ Ошибка Google Books:', error);
+        return [];
+    }
+}
+
+// 3. ФУНКЦИЯ ПОИСКА ПО ISBN
+async function searchBookByISBN(isbn) {
+    if (!isbn || isbn.trim() === '') return null;
+    
+    console.log('📚 Поиск книги по ISBN:', isbn);
+    
+    try {
+        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=isbn:' + 
+                     encodeURIComponent(isbn);
+        
+        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
+            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
+        }
+        
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        
+        if (!response.ok) {
+            console.error('Google Books API ошибка:', response.status);
+            return null;
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.items && data.items.length > 0) {
+            var book = data.items[0];
+            var volume = book.volumeInfo || {};
+            var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
+            
+            var imageUrl = 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+            if (volume.imageLinks) {
+                imageUrl = volume.imageLinks.thumbnail || 
+                           volume.imageLinks.smallThumbnail || 
+                           imageUrl;
+                imageUrl = imageUrl.replace('http://', 'https://');
+            }
+            
+            var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
+            var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
+            var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
+            
+            return {
+                id: 'book_' + book.id,
+                type: "book",
+                title: volume.title || 'Без названия',
+                year: publishedYear,
+                rating: rating,
+                description: description.substring(0, 300),
+                image: imageUrl,
+                author: authors,
+                pages: volume.pageCount || "—",
+                source: "Google Books",
+                links: { 
+                    buy: volume.infoLink || '#' 
+                }
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ Ошибка поиска по ISBN:', error);
+        return null;
+    }
+}
+
+// 4. ФУНКЦИЯ ПОЛУЧЕНИЯ ПОПУЛЯРНЫХ КНИГ
+async function getPopularBooks() {
+    try {
+        console.log('📚 Получение популярных книг...');
+        
+        let apiUrl = 'https://www.googleapis.com/books/v1/volumes?q=bestseller&maxResults=12&orderBy=relevance';
+        
+        if (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА') {
+            apiUrl += '&key=' + GOOGLE_BOOKS_API_KEY;
+        }
+        
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+        
+        if (!response.ok) {
+            console.error('Google Books API ошибка:', response.status);
+            return [];
+        }
+        
+        const data = await response.json();
+        
+        if (data && data.items && data.items.length > 0) {
+            return data.items.map(function(book) {
+                var volume = book.volumeInfo || {};
+                var description = volume.description ? volume.description.replace(/<[^>]*>/g, '') : 'Описание отсутствует';
+                
+                var imageUrl = 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+                if (volume.imageLinks) {
+                    imageUrl = volume.imageLinks.thumbnail || 
+                               volume.imageLinks.smallThumbnail || 
+                               imageUrl;
+                    imageUrl = imageUrl.replace('http://', 'https://');
+                }
+                
+                var authors = volume.authors ? volume.authors.join(', ') : 'Автор не указан';
+                var publishedYear = volume.publishedDate ? volume.publishedDate.split('-')[0] : null;
+                var rating = volume.averageRating ? volume.averageRating.toFixed(1) : null;
+                
+                return {
+                    id: 'book_' + book.id,
+                    type: "book",
+                    title: volume.title || 'Без названия',
+                    year: publishedYear,
+                    rating: rating,
+                    description: description.substring(0, 350),
+                    image: imageUrl,
+                    author: authors,
+                    pages: volume.pageCount || "—",
+                    source: "Google Books",
+                    links: { 
+                        buy: volume.infoLink || '#' 
+                    }
+                };
+            });
+        }
+        return [];
+    } catch (error) {
+        console.error('❌ Ошибка получения популярных книг:', error);
+        return [];
+    }
+}
+
+// 5. ФУНКЦИЯ ДЛЯ УНИВЕРСАЛЬНОГО ПОИСКА (ДОБАВЛЯЕМ КНИГИ)
+// Нужно дополнить существующую функцию searchAllAPIs
+// Найдите в api.js функцию searchAllAPIs и добавьте в неё вызов searchGoogleBooks
+
+// 6. ЭКСПОРТ ФУНКЦИЙ (ДОБАВЛЯЕМ В КОНЕЦ ФАЙЛА)
+window.searchGoogleBooks = searchGoogleBooks;
+window.searchBookByISBN = searchBookByISBN;
+window.getPopularBooks = getPopularBooks;
+
+console.log('✅ Google Books API загружен');
+console.log('📌 Google Books API: ' + (GOOGLE_BOOKS_API_KEY && GOOGLE_BOOKS_API_KEY !== 'ВАШ_КЛЮЧ_СЮДА' ? '✅ настроен' : '⚠️ без ключа (ограниченный режим)'));
 
 // ========== ЭКСПОРТ ФУНКЦИЙ ==========
 window.searchKinopoiskAPI = searchKinopoiskAPI;
