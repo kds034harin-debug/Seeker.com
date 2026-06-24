@@ -11,7 +11,7 @@ const IGDB_CLIENT_ID = 'ioi10i8wb2uk3fo6cjg30wxfe5e40w';
 const IGDB_ACCESS_TOKEN = '_______ПОЛУЧИТЬ_ЧЕРЕЗ_ЗАПРОС_______';
 
 // 3. Google Books
-const GOOGLE_BOOKS_API_KEY = '';
+const GOOGLE_BOOKS_API_KEY = 'AIzaSyAjhurxN3r8j4MjEzFDW6fIBXkgKDZzbOs';
 
 // 4. NewsAPI - ОТКЛЮЧАЕМ (ошибка SSL)
 const USE_NEWS_API = false; // ← ВЫКЛЮЧАЕМ NewsAPI
