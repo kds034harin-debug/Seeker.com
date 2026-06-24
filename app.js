@@ -287,7 +287,7 @@ function renderNews() {
     newsContainer.innerHTML = html;
 }
 
-// ========== ОТРИСОВКА КАРТОЧЕК (для главной страницы) ==========
+// ========== ОТРИСОВКА КАРТОЧЕК ==========
 function renderCards(items) {
     if (!items || !items.length) {
         resultsContainer.innerHTML = '<div class="empty-state">Ничего не найдено</div>';
