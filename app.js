@@ -1179,6 +1179,112 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Инициализация завершена');
 });
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM загружен, инициализация...');
+    
+    // ... существующий код инициализации (поиск, кнопки, модалки) ...
+    
+    // ============================================================
+    // ========== АВТООБНОВЛЕНИЕ НОВОСТЕЙ ==========
+    // ============================================================
+    
+    // 1. Загружаем новости при старте (через 2 секунды)
+    setTimeout(function() {
+        updateAllNews();
+    }, 2000);
+    
+    // 2. Автообновление каждые 15 минут
+    setInterval(function() {
+        updateAllNews();
+    }, 15 * 60 * 1000);
+    
+    // 3. Обновляем при возвращении на вкладку
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            // Пользователь вернулся на страницу — обновляем новости
+            updateAllNews();
+        }
+    });
+    
+    // 4. Кнопка "Свежие" уже есть в коде (обновляет при клике)
+    
+    console.log('Инициализация завершена');
+});
+
+// ========== ОБНОВЛЕНИЕ НОВОСТЕЙ (улучшенная версия) ==========
+async function updateAllNews() {
+    var refreshBtn = document.getElementById('refreshNewsBtn');
+    if (refreshBtn) {
+        refreshBtn.innerHTML = '⏳ Загрузка...';
+        refreshBtn.disabled = true;
+    }
+    
+    showToast('🔄 Обновление новостей...');
+    
+    try {
+        // Проверяем, есть ли функция fetchAllNewsFromRSS
+        if (typeof fetchAllNewsFromRSS === 'function') {
+            var freshNews = await fetchAllNewsFromRSS();
+            
+            if (freshNews && freshNews.length > 0) {
+                localStorage.setItem('seeker_news', JSON.stringify(freshNews));
+                newsDatabase = freshNews;
+                renderNews();
+                showToast('✅ Загружено ' + freshNews.length + ' новостей!');
+            } else {
+                showToast('⚠️ Новости не загружены');
+            }
+        } else {
+            // Если нет функции, используем демо-новости
+            var demoNews = [
+                { category: "Игры", title: "Новый трейлер GTA 6 набрал 100 млн просмотров", description: "Рекордный трейлер долгожданной игры побил все ожидания.", date: new Date().toLocaleString(), url: "https://www.rockstargames.com/gta-vi" },
+                { category: "Фильмы", title: "Дэдпул 3: первые отзывы критиков", description: "Критики в восторге от триквела с Райаном Рейнольдсом.", date: new Date().toLocaleString(), url: "https://www.marvel.com/movies/deadpool-3" },
+                { category: "Сериалы", title: "Fallout продлён на 2 сезон", description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры.", date: new Date().toLocaleString(), url: "https://www.amazon.com/Fallout" }
+            ];
+            
+            var added = 0;
+            for (var i = 0; i < demoNews.length; i++) {
+                var news = demoNews[i];
+                var exists = false;
+                for (var j = 0; j < newsDatabase.length; j++) {
+                    if (newsDatabase[j].title === news.title) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    newsDatabase.unshift({
+                        id: Date.now() + added,
+                        category: news.category,
+                        title: news.title,
+                        description: news.description,
+                        date: new Date().toLocaleString(),
+                        url: news.url
+                    });
+                    added++;
+                }
+            }
+            
+            if (added > 0) {
+                if (newsDatabase.length > 30) newsDatabase = newsDatabase.slice(0, 30);
+                saveNewsToStorage();
+                renderNews();
+                showToast('✅ Добавлено ' + added + ' новых новостей!');
+            } else {
+                showToast("Новости актуальны!");
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка обновления:', error);
+        showToast('❌ Ошибка загрузки новостей');
+    }
+    
+    if (refreshBtn) {
+        refreshBtn.innerHTML = '🔄 Свежие';
+        refreshBtn.disabled = false;
+    }
+}
 
 // ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========
 window.toggleFavorite = toggleFavorite;
