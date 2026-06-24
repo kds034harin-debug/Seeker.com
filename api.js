@@ -293,7 +293,128 @@ async function updateLocalBookCovers() {
     console.log('✅ Обновлено обложек:', updated);
     return updated;
 }
+// ============================================================
+// ========== НОВОСТИ ИЗ RSS ==========
+// ============================================================
 
+async function fetchRSSFeed(url) {
+    try {
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const response = await fetch(proxyUrl + encodeURIComponent(url));
+        
+        if (!response.ok) {
+            console.error('Ошибка загрузки RSS:', response.status);
+            return null;
+        }
+        
+        const text = await response.text();
+        const parser = new DOMParser();
+        const xml = parser.parseFromString(text, 'text/xml');
+        
+        const items = xml.querySelectorAll('item');
+        const news = [];
+        
+        items.forEach(function(item) {
+            const title = item.querySelector('title')?.textContent || '';
+            const description = item.querySelector('description')?.textContent || '';
+            const link = item.querySelector('link')?.textContent || '';
+            const pubDate = item.querySelector('pubDate')?.textContent || '';
+            const category = item.querySelector('category')?.textContent || '';
+            
+            const cleanDescription = description.replace(/<[^>]*>/g, '').trim();
+            
+            if (title) {
+                news.push({
+                    title: title.trim(),
+                    description: cleanDescription.substring(0, 300) || 'Описание отсутствует',
+                    url: link || '#',
+                    date: pubDate ? new Date(pubDate).toLocaleString() : new Date().toLocaleString(),
+                    category: category || 'Новости'
+                });
+            }
+        });
+        
+        return news;
+    } catch (error) {
+        console.error('Ошибка парсинга RSS:', error);
+        return null;
+    }
+}
+
+async function fetchAllNewsFromRSS() {
+    console.log('📰 Загрузка новостей из RSS...');
+    const allNews = [];
+    
+    try {
+        const sources = [
+            'https://www.kinopoisk.ru/news/rss/',
+            'https://www.film.ru/rss/news',
+            'https://www.ign.com/rss/articles',
+            'https://www.litres.ru/static/rss/news.xml',
+            'https://www.rbc.ru/rss/culture/',
+            'https://www.kommersant.ru/RSS/news-culture.xml'
+        ];
+        
+        const promises = sources.map(function(source) {
+            return fetchRSSFeed(source);
+        });
+        
+        const results = await Promise.all(promises);
+        
+        results.forEach(function(newsList) {
+            if (newsList && newsList.length > 0) {
+                allNews.push.apply(allNews, newsList);
+            }
+        });
+        
+        // Удаляем дубликаты по заголовку
+        const uniqueNews = [];
+        const titles = {};
+        
+        allNews.forEach(function(news) {
+            if (!titles[news.title]) {
+                titles[news.title] = true;
+                uniqueNews.push(news);
+            }
+        });
+        
+        // Сортируем по дате (сначала свежие)
+        uniqueNews.sort(function(a, b) {
+            var dateA = new Date(a.date);
+            var dateB = new Date(b.date);
+            return dateB - dateA;
+        });
+        
+        console.log('✅ Загружено новостей из RSS:', uniqueNews.length);
+        return uniqueNews.slice(0, 30);
+    } catch (error) {
+        console.error('Ошибка загрузки RSS новостей:', error);
+        return [];
+    }
+}
+
+// ========== ОБНОВЛЕНИЕ НОВОСТЕЙ ==========
+async function updateNewsDatabase() {
+    console.log('🔄 Обновление новостей...');
+    
+    try {
+        const news = await fetchAllNewsFromRSS();
+        
+        if (news && news.length > 0) {
+            localStorage.setItem('seeker_news', JSON.stringify(news));
+            console.log('✅ Новости обновлены, добавлено:', news.length);
+            return news;
+        }
+        return [];
+    } catch (error) {
+        console.error('Ошибка обновления новостей:', error);
+        return [];
+    }
+}
+
+// Экспорт
+window.fetchAllNewsFromRSS = fetchAllNewsFromRSS;
+window.updateNewsDatabase = updateNewsDatabase;
 // Экспорт
 window.getBookCoverFromOpenLibrary = getBookCoverFromOpenLibrary;
 window.updateLocalBookCovers = updateLocalBookCovers;
