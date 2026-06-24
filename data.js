@@ -61,7 +61,7 @@ let contentDatabase = [
     },
 
     // ============================================================
-    // ========== ИГРЫ (С ГАРАНТИРОВАННО РАБОЧИМИ КАРТИНКАМИ) ==========
+    // ========== ИГРЫ (С ПРАВИЛЬНЫМИ КАРТИНКАМИ) ==========
     // ============================================================
     
     // === Ведьмак 1 ===
@@ -80,10 +80,10 @@ let contentDatabase = [
         developer: "CD Projekt RED", platforms: "PC, Xbox 360", genre: "RPG, Action",
         links: { buy: "https://store.steampowered.com/app/20920/The_Witcher_2_Assassins_of_Kings_Enhanced_Edition/" }
     },
-    // === Ведьмак 3 ===
+    // === Ведьмак 3: Дикая Охота ===
     { 
         id: 9, type: "game", title: "Ведьмак 3: Дикая Охота", year: "2015", rating: "9.6",
-        description: "Легендарная RPG от CD Projekt RED. Завершающая часть трилогии о Геральте из Ривии.",
+        description: "Легендарная RPG от CD Projekt RED. Завершающая часть трилогии о Геральте из Ривии. Открытый мир, захватывающий сюжет и множество побочных заданий.",
         image: "https://upload.wikimedia.org/wikipedia/ru/0/0c/Wied%C5%BAmin_3_Dziki_Gon.jpg",
         developer: "CD Projekt RED", platforms: "PC, PS5, Xbox, Switch", genre: "RPG, Action",
         links: { buy: "https://store.steampowered.com/app/292030/The_Witcher_3_Wild_Hunt/" }
@@ -123,7 +123,7 @@ let contentDatabase = [
     // === God of War (2018) ===
     { 
         id: 9005, type: "game", title: "God of War", year: "2018", rating: "9.7",
-        description: "Кратос и его сын Атрей отправляются в путешествие по скандинавской мифологии. Новая глава в легендарной серии.",
+        description: "Кратос и его сын Атрей отправляются в путешествие по скандинавской мифологии.",
         image: "https://upload.wikimedia.org/wikipedia/ru/7/75/God_of_War_2018_cover.jpg",
         developer: "Santa Monica Studio", platforms: "PC, PS5, PS4", genre: "Action-adventure",
         links: { buy: "https://store.steampowered.com/app/1593500/God_of_War/" }
