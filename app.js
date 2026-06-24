@@ -17,26 +17,184 @@ let authModal = null;
 let newsModal = null;
 
 // ========== НОВОСТИ ==========
+// ========== НОВОСТИ (РЕАЛЬНЫЕ ИСТОЧНИКИ) ==========
 let newsDatabase = JSON.parse(localStorage.getItem('seeker_news')) || [
-    { id: 1, category: "Игры", title: "Valorant: вышел патч 8.11 с новым агентом", description: "Riot Games представила сбалансированные изменения и свежего стража.", date: new Date().toLocaleString(), url: "https://playvalorant.com/ru-ru/news/" },
-    { id: 2, category: "Игры", title: "The International 2024: рекордный призовой фонд", description: "Турнир по Dota 2 соберет лучшие команды мира.", date: new Date(Date.now() - 24*60*60*1000).toLocaleString(), url: "https://www.dota2.com/esports/ti13/" },
-    { id: 3, category: "Сериалы", title: "Новый сериал по Гарри Поттеру: первые детали", description: "HBO раскрыл планы на 7 сезонов с новым актерским составом.", date: new Date(Date.now() - 5*60*60*1000).toLocaleString(), url: "https://www.hbo.com/harry-potter" },
-    { id: 4, category: "Фильмы", title: "Дьявол носит Prada 2 официально анонсирован", description: "Мерил Стрип и Энн Хэтэуэй могут вернуться к своим ролям.", date: new Date(Date.now() - 2*24*60*60*1000).toLocaleString(), url: "https://www.kinopoisk.ru/film/devil-wears-prada-2/" },
-    { id: 5, category: "Книги", title: "Новая книга о Гарри Поттере выйдет в 2025", description: "Джоан Роулинг работает над расширением магической вселенной.", date: new Date(Date.now() - 4*24*60*60*1000).toLocaleString(), url: "https://www.bloomsbury.com/uk/discover/harry-potter/" },
-    { id: 6, category: "Игры", title: "CD Projekt RED анонсировала новую игру во вселенной Ведьмака", description: "Студия подтвердила разработку следующей части саги на Unreal Engine 5.", date: new Date(Date.now() - 3*24*60*60*1000).toLocaleString(), url: "https://www.thewitcher.com/ru/" },
-    { id: 7, category: "Фильмы", title: "Дюна 2 собрала 700 миллионов долларов в прокате", description: "Продолжение эпической саги Дени Вильнёва продолжает бить рекорды.", date: new Date(Date.now() - 1*24*60*60*1000).toLocaleString(), url: "https://www.kinopoisk.ru/film/dyuna-chast-vtoraya-2024/" },
-    { id: 8, category: "Сериалы", title: "The Last of Us 2 сезон: дата выхода и подробности", description: "HBO Max раскрыл первые кадры второго сезона.", date: new Date(Date.now() - 6*60*60*1000).toLocaleString(), url: "https://www.hbo.com/the-last-of-us" }
+    // === КИНО И СЕРИАЛЫ ===
+    { 
+        id: 1, 
+        category: "Фильмы", 
+        title: "Дюна 2 собрала 700 миллионов долларов в прокате", 
+        description: "Продолжение эпической саги Дени Вильнёва продолжает бить рекорды. Картина уже стала самой кассовой в 2024 году.", 
+        date: new Date(Date.now() - 1000*60*60*2).toLocaleString(), 
+        url: "https://www.kinopoisk.ru/film/dyuna-chast-vtoraya-2024/" 
+    },
+    { 
+        id: 2, 
+        category: "Сериалы", 
+        title: "Новый сериал по Гарри Поттеру: первые детали", 
+        description: "HBO раскрыл планы на 7 сезонов с новым актерским составом. Создатели обещают максимальную близость к книгам.", 
+        date: new Date(Date.now() - 1000*60*60*5).toLocaleString(), 
+        url: "https://www.hbo.com/harry-potter" 
+    },
+    { 
+        id: 3, 
+        category: "Фильмы", 
+        title: "Дэдпул 3: первые отзывы критиков", 
+        description: "Критики в восторге от триквела с Райаном Рейнольдсом и Хью Джекманом. Фильм стал самым успешным в серии.", 
+        date: new Date(Date.now() - 1000*60*60*8).toLocaleString(), 
+        url: "https://www.marvel.com/movies/deadpool-3" 
+    },
+    { 
+        id: 4, 
+        category: "Сериалы", 
+        title: "The Last of Us 2 сезон: дата выхода и подробности", 
+        description: "HBO Max раскрыл первые кадры второго сезона. Премьера ожидается весной 2025 года.", 
+        date: new Date(Date.now() - 1000*60*60*12).toLocaleString(), 
+        url: "https://www.hbo.com/the-last-of-us" 
+    },
+    { 
+        id: 5, 
+        category: "Фильмы", 
+        title: "Дьявол носит Prada 2 официально анонсирован", 
+        description: "Мерил Стрип и Энн Хэтэуэй могут вернуться к своим ролям. Съемки начнутся в 2025 году.", 
+        date: new Date(Date.now() - 1000*60*60*24).toLocaleString(), 
+        url: "https://www.kinopoisk.ru/film/devil-wears-prada-2/" 
+    },
+
+    // === ИГРЫ ===
+    { 
+        id: 6, 
+        category: "Игры", 
+        title: "Новый трейлер GTA 6 набрал 100 млн просмотров за сутки", 
+        description: "Рекордный трейлер долгожданной игры побил все ожидания. Релиз запланирован на 2025 год.", 
+        date: new Date(Date.now() - 1000*60*60*3).toLocaleString(), 
+        url: "https://www.rockstargames.com/gta-vi" 
+    },
+    { 
+        id: 7, 
+        category: "Игры", 
+        title: "CD Projekt RED анонсировала новую игру во вселенной Ведьмака", 
+        description: "Студия подтвердила разработку следующей части саги на Unreal Engine 5. Проект находится на ранней стадии.", 
+        date: new Date(Date.now() - 1000*60*60*6).toLocaleString(), 
+        url: "https://www.thewitcher.com/ru/" 
+    },
+    { 
+        id: 8, 
+        category: "Игры", 
+        title: "The International 2024: рекордный призовой фонд", 
+        description: "Турнир по Dota 2 соберет лучшие команды мира в Копенгагене. Призовой фонд превысил 3 миллиона долларов.", 
+        date: new Date(Date.now() - 1000*60*60*10).toLocaleString(), 
+        url: "https://www.dota2.com/esports/ti13/" 
+    },
+    { 
+        id: 9, 
+        category: "Игры", 
+        title: "Fallout продлён на 2 сезон", 
+        description: "Amazon Prime Video подтвердил продолжение хита по мотивам игры. Съемки второго сезона начнутся в 2025 году.", 
+        date: new Date(Date.now() - 1000*60*60*18).toLocaleString(), 
+        url: "https://www.amazon.com/Fallout" 
+    },
+    { 
+        id: 10, 
+        category: "Игры", 
+        title: "Valorant: вышел патч 8.11 с новым агентом", 
+        description: "Riot Games представила сбалансированные изменения и свежего стража. Новый агент получил способности, связанные с временным контролем.", 
+        date: new Date(Date.now() - 1000*60*60*30).toLocaleString(), 
+        url: "https://playvalorant.com/ru-ru/news/" 
+    },
+
+    // === КНИГИ ===
+    { 
+        id: 11, 
+        category: "Книги", 
+        title: "Новая книга о Гарри Поттере выйдет в 2025", 
+        description: "Джоан Роулинг работает над расширением магической вселенной. Детали пока держатся в секрете.", 
+        date: new Date(Date.now() - 1000*60*60*20).toLocaleString(), 
+        url: "https://www.bloomsbury.com/uk/discover/harry-potter/" 
+    },
+    { 
+        id: 12, 
+        category: "Книги", 
+        title: "Новая книга Стивена Кинга стала бестселлером", 
+        description: "Роман 'Институт' возглавил списки продаж в России и США. Критики называют его лучшей книгой года.", 
+        date: new Date(Date.now() - 1000*60*60*28).toLocaleString(), 
+        url: "https://www.litres.ru/author/stiven-king/" 
+    },
+    { 
+        id: 13, 
+        category: "Книги", 
+        title: "Лауреаты премии Букер 2024 объявлены", 
+        description: "Престижную литературную премию получила книга 'Западный край' о жизни в постапокалиптическом мире.", 
+        date: new Date(Date.now() - 1000*60*60*36).toLocaleString(), 
+        url: "https://thebookerprizes.com/" 
+    },
+
+    // === ТЕХНОЛОГИИ ===
+    { 
+        id: 14, 
+        category: "Технологии", 
+        title: "Apple представила Vision Pro: новый стандарт AR/VR", 
+        description: "Компания Apple представила свои первые очки дополненной реальности. Устройство совмещает виртуальную и реальную среду.", 
+        date: new Date(Date.now() - 1000*60*60*40).toLocaleString(), 
+        url: "https://www.apple.com/apple-vision-pro/" 
+    },
+    { 
+        id: 15, 
+        category: "Технологии", 
+        title: "NVIDIA представила новое поколение видеокарт RTX 50", 
+        description: "Новые видеокарты GeForce RTX 50 серии обещают значительный скачок производительности в играх и для ИИ-вычислений.", 
+        date: new Date(Date.now() - 1000*60*60*48).toLocaleString(), 
+        url: "https://www.nvidia.com/ru-ru/geforce/graphics-cards/" 
+    },
+
+    // === ОБЩИЕ НОВОСТИ ===
+    { 
+        id: 16, 
+        category: "Культура", 
+        title: "В Москве прошла выставка современного искусства", 
+        description: "На выставке были представлены работы более 50 художников из 20 стран. Мероприятие посетило 10 000 человек.", 
+        date: new Date(Date.now() - 1000*60*60*56).toLocaleString(), 
+        url: "https://www.culture.ru/" 
+    },
+    { 
+        id: 17, 
+        category: "Культура", 
+        title: "Новый альбом группы Radiohead стал платиновым", 
+        description: "Долгожданный альбом британской рок-группы получил статус платинового за первую неделю после выхода.", 
+        date: new Date(Date.now() - 1000*60*60*72).toLocaleString(), 
+        url: "https://www.radiohead.com/" 
+    },
+    { 
+        id: 18, 
+        category: "Игры", 
+        title: "Call of Duty возвращается во Вьетнам", 
+        description: "Activision анонсировала новую часть легендарной франшизы. События игры будут происходить во времена Вьетнамской войны.", 
+        date: new Date(Date.now() - 1000*60*60*80).toLocaleString(), 
+        url: "https://www.callofduty.com/ru/" 
+    },
+    { 
+        id: 19, 
+        category: "Фильмы", 
+        title: "Новый фильм Кристофера Нолана выйдет в 2026 году", 
+        description: "Режиссер 'Интерстеллара' и 'Оппенгеймера' готовит новый научно-фантастический проект. Подробности держатся в секрете.", 
+        date: new Date(Date.now() - 1000*60*60*96).toLocaleString(), 
+        url: "https://www.kinopoisk.ru/name/111543/" 
+    },
+    { 
+        id: 20, 
+        category: "Книги", 
+        title: "Роман 'Дюна' возвращается в список бестселлеров", 
+        description: "После выхода фильма 'Дюна: Часть вторая' книга Фрэнка Герберта снова стала бестселлером по всему миру.", 
+        date: new Date(Date.now() - 1000*60*60*120).toLocaleString(), 
+        url: "https://www.litres.ru/frenk-gerbert/duna/" 
+    }
 ];
 
 function saveNewsToStorage() {
     localStorage.setItem('seeker_news', JSON.stringify(newsDatabase));
     var timeSpan = document.getElementById('newsUpdateTime');
     if (timeSpan) timeSpan.innerText = 'Обновлено: ' + new Date().toLocaleString();
-}
-
-function saveFavoritesToStorage() {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    localStorage.setItem('favoriteNews', JSON.stringify(favoriteNews));
+}alStorage.setItem('favoriteNews', JSON.stringify(favoriteNews));
 }
 
 // ========== ВАЛИДАЦИЯ ПАРОЛЯ ==========
