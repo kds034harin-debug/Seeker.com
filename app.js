@@ -287,7 +287,7 @@ function renderNews() {
     newsContainer.innerHTML = html;
 }
 
-// ========== ОТРИСОВКА КАРТОЧЕК ==========
+// ========== ОТРИСОВКА КАРТОЧЕК (для главной страницы) ==========
 function renderCards(items) {
     if (!items || !items.length) {
         resultsContainer.innerHTML = '<div class="empty-state">Ничего не найдено</div>';
@@ -352,6 +352,181 @@ function renderCards(items) {
     }
 }
 
+// ========== ОТРИСОВКА ФИЛЬМОВ ==========
+function renderMovies(movies) {
+    if (!movies || !movies.length) {
+        return '';
+    }
+    
+    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">🎬 Фильмы и сериалы (' + movies.length + ')</h3>';
+    
+    for (var i = 0; i < movies.length; i++) {
+        var item = movies[i];
+        var typeLabel = item.type === 'series' ? 'СЕРИАЛ' : 'ФИЛЬМ';
+        var links = getLinksByType(item);
+        var imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+        var isFav = isFavorite(item.id, 'content');
+        var favButton = '';
+        
+        if (currentUser) {
+            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + item.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + item.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
+        }
+        
+        var linksHtml = '';
+        for (var j = 0; j < links.length; j++) {
+            linksHtml += '<a href="' + links[j].url + '" target="_blank" class="link-btn">' + links[j].text + '</a>';
+        }
+        
+        var ratingHtml = '';
+        if (item.rating) {
+            ratingHtml = '<span class="year-rating">⭐ ' + item.rating + '</span>';
+        }
+        
+        html += '<div class="result-card" data-id="' + item.id + '" data-type="' + item.type + '">' +
+            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
+            '<div class="card-content">' +
+            '<div class="card-header">' +
+            '<span class="content-type" style="background:#1a1a1a; color:white; padding:2px 8px; border-radius:4px;">' + typeLabel + '</span>' +
+            ratingHtml +
+            favButton +
+            '</div>' +
+            '<div class="title">' + escapeHtml(item.title) + '</div>' +
+            '<div class="description">' + escapeHtml((item.description || '').substring(0, 150)) + ((item.description || '').length > 150 ? '...' : '') + '</div>' +
+            '<div class="links-section">' + linksHtml + '</div>' +
+            '</div>' +
+            '</div>';
+    }
+    
+    return html;
+}
+
+// ========== ОТРИСОВКА ИГР ==========
+function renderGames(games) {
+    if (!games || !games.length) {
+        return '';
+    }
+    
+    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">🎮 Игры (' + games.length + ')</h3>';
+    
+    for (var i = 0; i < games.length; i++) {
+        var game = games[i];
+        var imageUrl = game.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+        var isFav = isFavorite(game.id, 'content');
+        var favButton = '';
+        
+        if (currentUser) {
+            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + game.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + game.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
+        }
+        
+        var ratingHtml = '';
+        if (game.rating) {
+            ratingHtml = '<span class="year-rating">⭐ ' + game.rating + '</span>';
+        }
+        
+        html += '<div class="result-card" data-id="' + game.id + '" data-type="game">' +
+            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
+            '<div class="card-content">' +
+            '<div class="card-header">' +
+            '<span class="content-type" style="background:#4CAF50; color:white; padding:2px 8px; border-radius:4px;">🎮 ИГРА</span>' +
+            ratingHtml +
+            favButton +
+            '</div>' +
+            '<div class="title">' + escapeHtml(game.title) + '</div>' +
+            '<div class="description">' + escapeHtml((game.description || '').substring(0, 150)) + ((game.description || '').length > 150 ? '...' : '') + '</div>' +
+            '<div class="info-grid">' +
+            '<div class="info-item"><span class="info-label">Разработчик:</span> ' + escapeHtml(game.developer || 'Не указан') + '</div>' +
+            '<div class="info-item"><span class="info-label">Платформы:</span> ' + escapeHtml(game.platforms || '—') + '</div>' +
+            '</div>' +
+            '<div class="links-section">' +
+            '<a href="' + (game.links?.buy || '#') + '" target="_blank" class="link-btn">🎮 Купить</a>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+    
+    return html;
+}
+
+// ========== ОТРИСОВКА КНИГ ==========
+function renderBooks(books) {
+    if (!books || !books.length) {
+        return '';
+    }
+    
+    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">📚 Книги (' + books.length + ')</h3>';
+    
+    for (var i = 0; i < books.length; i++) {
+        var book = books[i];
+        var imageUrl = book.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
+        var isFav = isFavorite(book.id, 'content');
+        var favButton = '';
+        
+        if (currentUser) {
+            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + book.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + book.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
+        }
+        
+        var ratingHtml = '';
+        if (book.rating) {
+            ratingHtml = '<span class="year-rating">⭐ ' + book.rating + ' / 5</span>';
+        }
+        
+        html += '<div class="result-card book-card" data-id="' + book.id + '" data-type="book">' +
+            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
+            '<div class="card-content">' +
+            '<div class="card-header">' +
+            '<span class="content-type" style="background:#8B4513; color:white; padding:2px 8px; border-radius:4px;">📖 КНИГА</span>' +
+            ratingHtml +
+            favButton +
+            '</div>' +
+            '<div class="title">' + escapeHtml(book.title) + '</div>' +
+            '<div class="description">' + escapeHtml((book.description || '').substring(0, 150)) + ((book.description || '').length > 150 ? '...' : '') + '</div>' +
+            '<div class="info-grid">' +
+            '<div class="info-item"><span class="info-label">Автор:</span> ' + escapeHtml(book.author || 'Не указан') + '</div>' +
+            '<div class="info-item"><span class="info-label">Год:</span> ' + (book.year || 'Не указан') + '</div>' +
+            '<div class="info-item"><span class="info-label">Страниц:</span> ' + (book.pages || '—') + '</div>' +
+            '</div>' +
+            '<div class="links-section">' +
+            '<a href="' + (book.links?.buy || '#') + '" target="_blank" class="link-btn">📖 Читать</a>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+    
+    return html;
+}
+
+// ========== ОТРИСОВКА НОВОСТЕЙ В РЕЗУЛЬТАТАХ ПОИСКА ==========
+function renderNewsResults(newsList) {
+    if (!newsList || !newsList.length) {
+        return '';
+    }
+    
+    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">📰 Новости (' + newsList.length + ')</h3>';
+    
+    for (var i = 0; i < newsList.length; i++) {
+        var news = newsList[i];
+        var isFav = isFavorite(news.id, 'news');
+        var favButton = '';
+        
+        if (currentUser) {
+            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + news.id + '" data-type="news" onclick="event.stopPropagation(); toggleFavorite(' + news.id + ', \'news\')">' + (isFav ? '★' : '☆') + '</button>';
+        }
+        
+        html += '<div class="news-card" style="margin-bottom: 1rem;">' +
+            '<div class="news-header">' +
+            '<span class="news-category">' + escapeHtml(news.category || 'Новости') + '</span>' +
+            '<span class="news-date">' + escapeHtml(news.date) + '</span>' +
+            favButton +
+            '</div>' +
+            '<div class="news-title" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">' + escapeHtml(news.title) + '</div>' +
+            '<div class="news-desc">' + escapeHtml(news.description) + '</div>' +
+            '<div class="news-link" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">Читать подробнее →</div>' +
+            '</div>';
+    }
+    
+    return html;
+}
+
 // ========== ПОИСК С ИНТЕГРАЦИЕЙ API ==========
 async function performSearch() {
     if (isLoading) return;
@@ -383,9 +558,19 @@ async function performSearch() {
         if (typeof searchAllAPIs === 'function') {
             apiResults = await searchAllAPIs(searchTerm);
         } else {
-            // Fallback только на Кинопоиск
             apiResults = await searchKinopoiskAPI(searchTerm);
         }
+        
+        // Разделяем по типам
+        var movies = apiResults.filter(function(item) { 
+            return item.type === 'movie' || item.type === 'series'; 
+        });
+        var games = apiResults.filter(function(item) { 
+            return item.type === 'game'; 
+        });
+        var books = apiResults.filter(function(item) { 
+            return item.type === 'book'; 
+        });
         
         // Поиск в локальной базе
         var localResults = contentDatabase.filter(function(item) {
@@ -396,23 +581,27 @@ async function performSearch() {
         // Фильтр по типу
         if (currentCategory !== "all") {
             localResults = localResults.filter(function(item) { return item.type === currentCategory; });
-            apiResults = apiResults.filter(function(item) { return item.type === currentCategory; });
-        }
-        
-        // Объединяем результаты
-        var allResults = apiResults.slice();
-        for (var m = 0; m < localResults.length; m++) {
-            var local = localResults[m];
-            var exists = false;
-            for (var n = 0; n < allResults.length; n++) {
-                if (allResults[n].title === local.title) {
-                    exists = true;
-                    break;
+            if (currentCategory === 'movie' || currentCategory === 'series') {
+                movies = movies.concat(localResults);
+            } else if (currentCategory === 'game') {
+                games = games.concat(localResults);
+            } else if (currentCategory === 'book') {
+                books = books.concat(localResults);
+            }
+        } else {
+            // Добавляем локальные результаты в соответствующие категории
+            localResults.forEach(function(item) {
+                if (item.type === 'movie' || item.type === 'series') {
+                    var exists = movies.some(function(m) { return m.title === item.title; });
+                    if (!exists) movies.push(item);
+                } else if (item.type === 'game') {
+                    var exists = games.some(function(g) { return g.title === item.title; });
+                    if (!exists) games.push(item);
+                } else if (item.type === 'book') {
+                    var exists = books.some(function(b) { return b.title === item.title; });
+                    if (!exists) books.push(item);
                 }
-            }
-            if (!exists) {
-                allResults.push(local);
-            }
+            });
         }
         
         // Поиск в новостях
@@ -421,7 +610,7 @@ async function performSearch() {
                    (news.description && news.description.toLowerCase().indexOf(searchTerm) !== -1);
         });
         
-        var totalResults = allResults.length + filteredNews.length;
+        var totalResults = movies.length + games.length + books.length + filteredNews.length;
         document.getElementById('resultCount').innerText = totalResults;
         
         if (totalResults === 0) {
@@ -432,88 +621,48 @@ async function performSearch() {
         
         var html = '';
         
-        if (allResults.length > 0) {
-            html += '<h3 style="margin: 0 0 1rem 0;">🎬 Контент (' + allResults.length + ')</h3>';
-            for (var p = 0; p < allResults.length; p++) {
-                var item = allResults[p];
-                var typeLabel = getTypeLabel(item.type);
-                var links = getLinksByType(item);
-                var imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-                var isFav = isFavorite(item.id, 'content');
-                var favButton = '';
-                var ratingHtml = '';
-                
-                if (currentUser) {
-                    favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + item.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + item.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
-                }
-                
-                if (item.rating) {
-                    ratingHtml = '<span class="year-rating">⭐ ' + item.rating + '</span>';
-                }
-                
-                var linksHtml2 = '';
-                for (var q = 0; q < links.length; q++) {
-                    linksHtml2 += '<a href="' + links[q].url + '" target="_blank" class="link-btn">' + links[q].text + '</a>';
-                }
-                
-                html += '<div class="result-card" data-id="' + item.id + '" data-type="' + item.type + '">' +
-                    '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
-                    '<div class="card-content">' +
-                    '<div class="card-header">' +
-                    '<span class="content-type">' + typeLabel + '</span>' +
-                    ratingHtml +
-                    favButton +
-                    '</div>' +
-                    '<div class="title">' + escapeHtml(item.title) + '</div>' +
-                    '<div class="description">' + escapeHtml((item.description || '').substring(0, 120)) + '...</div>' +
-                    '<div class="links-section">' + linksHtml2 + '</div>' +
-                    '</div>' +
-                    '</div>';
-            }
+        // Отображаем фильмы
+        if (movies.length > 0) {
+            html += renderMovies(movies);
         }
         
+        // Отображаем игры
+        if (games.length > 0) {
+            html += renderGames(games);
+        }
+        
+        // Отображаем книги
+        if (books.length > 0) {
+            html += renderBooks(books);
+        }
+        
+        // Отображаем новости
         if (filteredNews.length > 0) {
-            html += '<h3 style="margin: 1.5rem 0 1rem 0;">📰 Новости (' + filteredNews.length + ')</h3>';
-            for (var r = 0; r < filteredNews.length; r++) {
-                var news = filteredNews[r];
-                var isFav2 = isFavorite(news.id, 'news');
-                var favButton2 = '';
-                if (currentUser) {
-                    favButton2 = '<button class="favorite-star-btn ' + (isFav2 ? 'active' : '') + '" data-id="' + news.id + '" data-type="news" onclick="event.stopPropagation(); toggleFavorite(' + news.id + ', \'news\')">' + (isFav2 ? '★' : '☆') + '</button>';
-                }
-                html += '<div class="news-card" style="margin-bottom: 1rem;">' +
-                    '<div class="news-header">' +
-                    '<span class="news-category">' + escapeHtml(news.category) + '</span>' +
-                    '<span class="news-date">' + escapeHtml(news.date) + '</span>' +
-                    favButton2 +
-                    '</div>' +
-                    '<div class="news-title" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">' + escapeHtml(news.title) + '</div>' +
-                    '<div class="news-desc">' + escapeHtml(news.description) + '</div>' +
-                    '<div class="news-link" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">Читать подробнее →</div>' +
-                    '</div>';
-            }
+            html += renderNewsResults(filteredNews);
         }
         
         resultsContainerElem.innerHTML = html;
         
+        // Добавляем обработчики для кнопок избранного
         var favBtns = document.querySelectorAll('.favorite-star-btn');
-        for (var s = 0; s < favBtns.length; s++) {
+        for (var i = 0; i < favBtns.length; i++) {
             (function(btn) {
                 btn.onclick = function(e) {
                     e.stopPropagation();
                     toggleFavorite(btn.dataset.id, btn.dataset.type);
                 };
-            })(favBtns[s]);
+            })(favBtns[i]);
         }
         
-        var cards2 = document.querySelectorAll('.result-card');
-        for (var t = 0; t < cards2.length; t++) {
+        // Добавляем обработчики для карточек
+        var cards = document.querySelectorAll('.result-card');
+        for (var j = 0; j < cards.length; j++) {
             (function(card) {
                 card.addEventListener('click', function(e) {
                     if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
                     addCurrentToRecent(parseInt(card.dataset.id, 10), card.dataset.type);
                 });
-            })(cards2[t]);
+            })(cards[j]);
         }
         
     } catch (error) {
@@ -1030,318 +1179,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Инициализация завершена');
 });
-// ========== ОТРИСОВКА КНИГ ==========
-function renderBooks(books) {
-    if (!books || !books.length) {
-        return '';
-    }
-    
-    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">📚 Книги (' + books.length + ')</h3>';
-    
-    for (var i = 0; i < books.length; i++) {
-        var book = books[i];
-        var imageUrl = book.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-        var isFav = isFavorite(book.id, 'content');
-        var favButton = '';
-        
-        if (currentUser) {
-            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + book.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + book.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
-        }
-        
-        var ratingHtml = '';
-        if (book.rating) {
-            ratingHtml = '<span class="year-rating">⭐ ' + book.rating + ' / 5</span>';
-        }
-        
-        html += '<div class="result-card book-card" data-id="' + book.id + '" data-type="book">' +
-            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
-            '<div class="card-content">' +
-            '<div class="card-header">' +
-            '<span class="content-type" style="background:#8B4513; color:white; padding:2px 8px; border-radius:4px;">📖 КНИГА</span>' +
-            ratingHtml +
-            favButton +
-            '</div>' +
-            '<div class="title">' + escapeHtml(book.title) + '</div>' +
-            '<div class="description">' + escapeHtml((book.description || '').substring(0, 150)) + ((book.description || '').length > 150 ? '...' : '') + '</div>' +
-            '<div class="info-grid">' +
-            '<div class="info-item"><span class="info-label">Автор:</span> ' + escapeHtml(book.author || 'Не указан') + '</div>' +
-            '<div class="info-item"><span class="info-label">Год:</span> ' + (book.year || 'Не указан') + '</div>' +
-            '<div class="info-item"><span class="info-label">Страниц:</span> ' + (book.pages || '—') + '</div>' +
-            '</div>' +
-            '<div class="links-section">' +
-            '<a href="' + (book.links?.buy || '#') + '" target="_blank" class="link-btn">📖 Читать</a>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-    }
-    
-    return html;
-}
-async function performSearch() {
-    if (isLoading) return;
-    
-    var searchTerm = searchInput.value.trim().toLowerCase();
-    currentQuery = searchTerm;
-    
-    var newsSectionElem = document.getElementById('newsSection');
-    var resultsContainerElem = document.getElementById('resultsContainer');
-    var resultsStatsElem = document.getElementById('resultsStats');
-    
-    if (!searchTerm) {
-        newsSectionElem.style.display = "block";
-        resultsContainerElem.style.display = "none";
-        resultsStatsElem.style.display = "none";
-        renderNews();
-        return;
-    }
-    
-    isLoading = true;
-    resultsContainerElem.innerHTML = '<div class="loading-spinner" style="text-align:center; padding:2rem;"><i class="fas fa-spinner fa-pulse"></i> Поиск...</div>';
-    resultsContainerElem.style.display = "flex";
-    resultsStatsElem.style.display = "block";
-    newsSectionElem.style.display = "none";
-    
-    try {
-        // Поиск через API
-        var apiResults = await searchAllAPIs(searchTerm);
-        
-        // Разделяем по типам
-        var movies = apiResults.filter(function(item) { 
-            return item.type === 'movie' || item.type === 'series'; 
-        });
-        var games = apiResults.filter(function(item) { 
-            return item.type === 'game'; 
-        });
-        var books = apiResults.filter(function(item) { 
-            return item.type === 'book'; 
-        });
-        
-        // Поиск в локальной базе
-        var localResults = contentDatabase.filter(function(item) {
-            return (item.title && item.title.toLowerCase().indexOf(searchTerm) !== -1) ||
-                   (item.description && item.description.toLowerCase().indexOf(searchTerm) !== -1);
-        });
-        
-        // Фильтр по типу
-        if (currentCategory !== "all") {
-            localResults = localResults.filter(function(item) { return item.type === currentCategory; });
-            if (currentCategory === 'movie' || currentCategory === 'series') {
-                movies = movies.concat(localResults);
-            } else if (currentCategory === 'game') {
-                games = games.concat(localResults);
-            } else if (currentCategory === 'book') {
-                books = books.concat(localResults);
-            }
-        } else {
-            // Добавляем локальные результаты в соответствующие категории
-            localResults.forEach(function(item) {
-                if (item.type === 'movie' || item.type === 'series') {
-                    // Проверяем, нет ли уже такого фильма
-                    var exists = movies.some(function(m) { return m.title === item.title; });
-                    if (!exists) movies.push(item);
-                } else if (item.type === 'game') {
-                    var exists = games.some(function(g) { return g.title === item.title; });
-                    if (!exists) games.push(item);
-                } else if (item.type === 'book') {
-                    var exists = books.some(function(b) { return b.title === item.title; });
-                    if (!exists) books.push(item);
-                }
-            });
-        }
-        
-        // Поиск в новостях
-        var filteredNews = newsDatabase.filter(function(news) {
-            return (news.title && news.title.toLowerCase().indexOf(searchTerm) !== -1) ||
-                   (news.description && news.description.toLowerCase().indexOf(searchTerm) !== -1);
-        });
-        
-        var totalResults = movies.length + games.length + books.length + filteredNews.length;
-        document.getElementById('resultCount').innerText = totalResults;
-        
-        if (totalResults === 0) {
-            resultsContainerElem.innerHTML = '<div class="empty-state">Ничего не найдено по запросу "' + escapeHtml(searchTerm) + '"</div>';
-            isLoading = false;
-            return;
-        }
-        
-        var html = '';
-        
-        // Отображаем фильмы
-        if (movies.length > 0) {
-            html += renderMovies(movies);
-        }
-        
-        // Отображаем игры
-        if (games.length > 0) {
-            html += renderGames(games);
-        }
-        
-        // Отображаем книги
-        if (books.length > 0) {
-            html += renderBooks(books);
-        }
-        
-        // Отображаем новости
-        if (filteredNews.length > 0) {
-            html += renderNewsResults(filteredNews);
-        }
-        
-        resultsContainerElem.innerHTML = html;
-        
-        // Добавляем обработчики для кнопок избранного
-        var favBtns = document.querySelectorAll('.favorite-star-btn');
-        for (var i = 0; i < favBtns.length; i++) {
-            (function(btn) {
-                btn.onclick = function(e) {
-                    e.stopPropagation();
-                    toggleFavorite(btn.dataset.id, btn.dataset.type);
-                };
-            })(favBtns[i]);
-        }
-        
-        // Добавляем обработчики для карточек
-        var cards = document.querySelectorAll('.result-card');
-        for (var j = 0; j < cards.length; j++) {
-            (function(card) {
-                card.addEventListener('click', function(e) {
-                    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') return;
-                    addCurrentToRecent(parseInt(card.dataset.id, 10), card.dataset.type);
-                });
-            })(cards[j]);
-        }
-        
-    } catch (error) {
-        console.error('Ошибка поиска:', error);
-        resultsContainerElem.innerHTML = '<div class="empty-state">Ошибка поиска. Попробуйте позже.</div>';
-    } finally {
-        isLoading = false;
-    }
-}
-// ========== ОТРИСОВКА ФИЛЬМОВ ==========
-function renderMovies(movies) {
-    if (!movies || !movies.length) {
-        return '';
-    }
-    
-    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">🎬 Фильмы и сериалы (' + movies.length + ')</h3>';
-    
-    for (var i = 0; i < movies.length; i++) {
-        var item = movies[i];
-        var typeLabel = item.type === 'series' ? 'СЕРИАЛ' : 'ФИЛЬМ';
-        var links = getLinksByType(item);
-        var imageUrl = item.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-        var isFav = isFavorite(item.id, 'content');
-        var favButton = '';
-        
-        if (currentUser) {
-            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + item.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + item.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
-        }
-        
-        var linksHtml = '';
-        for (var j = 0; j < links.length; j++) {
-            linksHtml += '<a href="' + links[j].url + '" target="_blank" class="link-btn">' + links[j].text + '</a>';
-        }
-        
-        var ratingHtml = '';
-        if (item.rating) {
-            ratingHtml = '<span class="year-rating">⭐ ' + item.rating + '</span>';
-        }
-        
-        html += '<div class="result-card" data-id="' + item.id + '" data-type="' + item.type + '">' +
-            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
-            '<div class="card-content">' +
-            '<div class="card-header">' +
-            '<span class="content-type" style="background:#1a1a1a; color:white; padding:2px 8px; border-radius:4px;">' + typeLabel + '</span>' +
-            ratingHtml +
-            favButton +
-            '</div>' +
-            '<div class="title">' + escapeHtml(item.title) + '</div>' +
-            '<div class="description">' + escapeHtml((item.description || '').substring(0, 150)) + ((item.description || '').length > 150 ? '...' : '') + '</div>' +
-            '<div class="links-section">' + linksHtml + '</div>' +
-            '</div>' +
-            '</div>';
-    }
-    
-    return html;
-}// ========== ОТРИСОВКА ИГР ==========
-function renderGames(games) {
-    if (!games || !games.length) {
-        return '';
-    }
-    
-    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">🎮 Игры (' + games.length + ')</h3>';
-    
-    for (var i = 0; i < games.length; i++) {
-        var game = games[i];
-        var imageUrl = game.image || 'https://placehold.co/90x130/f0f0f0/aaa?text=No+Image';
-        var isFav = isFavorite(game.id, 'content');
-        var favButton = '';
-        
-        if (currentUser) {
-            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + game.id + '" data-type="content" onclick="event.stopPropagation(); toggleFavorite(' + game.id + ', \'content\')">' + (isFav ? '★' : '☆') + '</button>';
-        }
-        
-        var ratingHtml = '';
-        if (game.rating) {
-            ratingHtml = '<span class="year-rating">⭐ ' + game.rating + '</span>';
-        }
-        
-        html += '<div class="result-card" data-id="' + game.id + '" data-type="game">' +
-            '<div class="card-image" style="background-image: url(' + imageUrl + ');"></div>' +
-            '<div class="card-content">' +
-            '<div class="card-header">' +
-            '<span class="content-type" style="background:#4CAF50; color:white; padding:2px 8px; border-radius:4px;">🎮 ИГРА</span>' +
-            ratingHtml +
-            favButton +
-            '</div>' +
-            '<div class="title">' + escapeHtml(game.title) + '</div>' +
-            '<div class="description">' + escapeHtml((game.description || '').substring(0, 150)) + ((game.description || '').length > 150 ? '...' : '') + '</div>' +
-            '<div class="info-grid">' +
-            '<div class="info-item"><span class="info-label">Разработчик:</span> ' + escapeHtml(game.developer || 'Не указан') + '</div>' +
-            '<div class="info-item"><span class="info-label">Платформы:</span> ' + escapeHtml(game.platforms || '—') + '</div>' +
-            '</div>' +
-            '<div class="links-section">' +
-            '<a href="' + (game.links?.buy || '#') + '" target="_blank" class="link-btn">🎮 Купить</a>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-    }
-    
-    return html;
-}
-// ========== ОТРИСОВКА НОВОСТЕЙ В РЕЗУЛЬТАТАХ ПОИСКА ==========
-function renderNewsResults(newsList) {
-    if (!newsList || !newsList.length) {
-        return '';
-    }
-    
-    var html = '<h3 style="margin: 1.5rem 0 1rem 0;">📰 Новости (' + newsList.length + ')</h3>';
-    
-    for (var i = 0; i < newsList.length; i++) {
-        var news = newsList[i];
-        var isFav = isFavorite(news.id, 'news');
-        var favButton = '';
-        
-        if (currentUser) {
-            favButton = '<button class="favorite-star-btn ' + (isFav ? 'active' : '') + '" data-id="' + news.id + '" data-type="news" onclick="event.stopPropagation(); toggleFavorite(' + news.id + ', \'news\')">' + (isFav ? '★' : '☆') + '</button>';
-        }
-        
-        html += '<div class="news-card" style="margin-bottom: 1rem;">' +
-            '<div class="news-header">' +
-            '<span class="news-category">' + escapeHtml(news.category || 'Новости') + '</span>' +
-            '<span class="news-date">' + escapeHtml(news.date) + '</span>' +
-            favButton +
-            '</div>' +
-            '<div class="news-title" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">' + escapeHtml(news.title) + '</div>' +
-            '<div class="news-desc">' + escapeHtml(news.description) + '</div>' +
-            '<div class="news-link" onclick="addCurrentToRecent(' + news.id + ', \'news\'); window.open(\'' + news.url + '\', \'_blank\')">Читать подробнее →</div>' +
-            '</div>';
-    }
-    
-    return html;
-}
 
-// Делаем функции глобальными для доступа из HTML
+// ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ==========
 window.toggleFavorite = toggleFavorite;
 window.addCurrentToRecent = addCurrentToRecent;
 window.openModal = openModal;
