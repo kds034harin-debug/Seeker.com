@@ -233,6 +233,70 @@ async function searchAllAPIs(query) {
         return [];
     }
 }
+// ========== OPEN LIBRARY API (ДЛЯ КАРТИНОК) ==========
+async function getBookCoverFromOpenLibrary(title, author) {
+    try {
+        var query = encodeURIComponent(title);
+        if (author) {
+            query += '+' + encodeURIComponent(author);
+        }
+        
+        var url = 'https://openlibrary.org/search.json?q=' + query + '&limit=1';
+        var response = await fetch(url);
+        var data = await response.json();
+        
+        if (data && data.docs && data.docs.length > 0) {
+            var coverId = data.docs[0].cover_i;
+            if (coverId) {
+                return {
+                    url: 'https://covers.openlibrary.org/b/id/' + coverId + '-L.jpg',
+                    id: coverId
+                };
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error('Ошибка Open Library:', error);
+        return null;
+    }
+}
+
+// Функция для обновления картинок в локальной базе
+async function updateLocalBookCovers() {
+    console.log('🔄 Обновление обложек книг...');
+    var updated = 0;
+    
+    for (var i = 0; i < contentDatabase.length; i++) {
+        var book = contentDatabase[i];
+        if (book.type !== 'book') continue;
+        
+        // Пропускаем если уже есть нормальная картинка
+        if (book.image && !book.image.includes('placeholder') && !book.image.includes('No+Image')) {
+            continue;
+        }
+        
+        try {
+            var cover = await getBookCoverFromOpenLibrary(book.title, book.author);
+            if (cover && cover.url) {
+                book.image = cover.url;
+                updated++;
+                console.log('✅ Обновлена обложка для:', book.title);
+            }
+        } catch (error) {
+            console.error('Ошибка обновления:', error);
+        }
+        
+        // Задержка между запросами
+        await new Promise(function(resolve) { setTimeout(resolve, 300); });
+    }
+    
+    console.log('✅ Обновлено обложек:', updated);
+    return updated;
+}
+
+// Экспорт
+window.getBookCoverFromOpenLibrary = getBookCoverFromOpenLibrary;
+window.updateLocalBookCovers = updateLocalBookCovers;
 
 // ============================================================
 // ========== ЭКСПОРТ ==========
