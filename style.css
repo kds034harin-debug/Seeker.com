@@ -947,3 +947,58 @@ body {
         background: rgba(0,0,0,0.7);
     }
 }
+/* ========== ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ КНИГ ========== */
+
+/* Стиль для карточек книг */
+.book-card {
+    border-left: 4px solid #8B4513 !important;
+}
+
+.book-card .card-image {
+    border-radius: 4px !important;
+}
+
+/* Стили для тегов */
+.content-type {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Адаптив для книг */
+@media (max-width: 768px) {
+    .book-card .info-grid {
+        font-size: 0.65rem;
+    }
+}
+
+/* Стиль для загрузчика */
+.loading-spinner {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.loading-spinner i {
+    margin-right: 10px;
+    color: #1a1a1a;
+}
+
+/* Темная тема для книг */
+@media (prefers-color-scheme: dark) {
+    .book-card {
+        border-left-color: #A0522D !important;
+    }
+    
+    .collection-card {
+        background: #222 !important;
+        border-color: #333 !important;
+    }
+    
+    .collection-tag {
+        background: #333 !important;
+        color: #e8e8e8 !important;
+    }
+}
